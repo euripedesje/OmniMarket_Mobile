@@ -733,5 +733,4 @@ def main(page: ft.Page):
 
 if __name__ == "__main__":
     porta = int(os.environ.get("PORT", 8080))
-    # 'assets_dir' ativado para carregar imagens e ativar PWA no navegador
-    ft.app(target=main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir="assets")
+    ft.run(main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir="assets")
