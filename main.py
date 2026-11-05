@@ -172,7 +172,7 @@ def main(page: ft.Page):
                     busca_input,
                     ft.Button("📷", on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
                     ft.Button("🔍", on_click=lambda e: threading.Thread(target=carregar_estoque, args=(busca_input.value,)).start())
-                ]), padding=ft.padding.only(left=10, right=10, top=5, bottom=5)
+                ]), padding=10 # Substituição de padding.symmetric e padding.only
             ), lista_produtos
         ], expand=True, spacing=0, visible=True)
 
@@ -712,13 +712,14 @@ def main(page: ft.Page):
             elif idx == 3: carregar_compras()
             page.update()
 
+        # Correção: O Flet 1.0 parou de suportar ícones de fundo. Vamos usar os nomes das abas como botões.
         page.navigation_bar = ft.NavigationBar(
             selected_index=0, bgcolor=COR_PAINEL, indicator_color=COR_FUNDO, on_change=mudar_aba,
             destinations=[
-                ft.NavigationDestination(icon=ft.icons.INVENTORY_2_OUTLINED, label="Inventory"),
-                ft.NavigationDestination(icon=ft.icons.POINT_OF_SALE_OUTLINED, label="POS"),
-                ft.NavigationDestination(icon=ft.icons.ADD_BOX_OUTLINED, label="Register"),
-                ft.NavigationDestination(icon=ft.icons.SHOPPING_CART_OUTLINED, label="Restock"),
+                ft.NavigationDestination(label="📦 Inventory"),
+                ft.NavigationDestination(label="💰 POS"),
+                ft.NavigationDestination(label="➕ Register"),
+                ft.NavigationDestination(label="🛒 Restock"),
             ]
         )
 
