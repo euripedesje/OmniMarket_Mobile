@@ -21,16 +21,16 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Preparar o Flutter (Versão 3.24 é obrigatória para Flet 0.24.1)
+      - name: Preparar o Flutter (Obrigatório 3.24.3 para Flet 0.24.1)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.24.3'
           channel: 'stable'
 
-      - name: Instalar ferramentas de extração do Linux
+      - name: Instalar ferramentas de extração
         run: sudo apt-get update && sudo apt-get install -y xz-utils tar curl zip unzip
 
-      - name: Instalar Flet e Bibliotecas
+      - name: Instalar Flet
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
@@ -38,7 +38,7 @@ jobs:
       - name: Construir o APK
         run: flet build apk -v
 
-      - name: Guardar o Aplicativo Pronto
+      - name: Guardar o Aplicativo
         uses: actions/upload-artifact@v4
         with:
           name: OmniMarketPOS-APK
