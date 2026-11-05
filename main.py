@@ -8,7 +8,7 @@ from datetime import datetime, timezone, timedelta
 import os
 
 # =========================================================================
-# CLOUD CREDENTIALS & TIMEZONE (OMNIMARKET POS) - CHAVES OFICIAIS BAZAR ANNY
+# CLOUD CREDENTIALS & TIMEZONE (OMNIMARKET POS)
 # =========================================================================
 URL = "https://skqjtjpbjbkkxgsvppao.supabase.co"
 KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcWp0anBiamJra3hnc3ZwcGFvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMxOTYyMzEsImV4cCI6MjEwODc3MjIzMX0.PNJpq3nFKj4WiBf34rF9MlU2I6SzDYEh3yrYLvttp3k"
@@ -49,7 +49,7 @@ def main(page: ft.Page):
             page.update()
 
         # =====================================================================
-        # COMPONENTE DE BOTÃO BLINDADO (À prova de erros do Flet 1.0)
+        # COMPONENTE DE BOTÃO BLINDADO
         # =====================================================================
         def botao_customizado(texto, cor_bg, acao, expandir=False, altura=45, largura=None):
             return ft.Container(
@@ -143,7 +143,7 @@ def main(page: ft.Page):
 
         def carregar_estoque(termo=""):
             lista_produtos.controls.clear()
-            lista_produtos.controls.append(ft.Text("Sincronizando...", color="gray", text_align=ft.TextAlign.CENTER))
+            lista_produtos.controls.append(ft.Text("A sincronizar...", color="gray", text_align=ft.TextAlign.CENTER))
             page.update()
             try:
                 termo_limpo = str(termo).strip() if termo else ""
@@ -170,7 +170,7 @@ def main(page: ft.Page):
                                         ft.Text(p.get('nome', 'Sem Nome'), weight=ft.FontWeight.BOLD, size=18, color=COR_TEXTO),
                                         ft.Row([
                                             ft.Text(f"SKU: {p.get('codigo', '')}", color="gray", size=14),
-                                            ft.Text(f"Estoque: {estoque_atual}", color=COR_VERMELHO_ERRO if estoque_atual <= 2 else COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=14)
+                                            ft.Text(f"Stock: {estoque_atual}", color=COR_VERMELHO_ERRO if estoque_atual <= 2 else COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=14)
                                         ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                         ft.Text(f"R$ {float(p.get('preco', 0.0)):.2f}", size=20, color=COR_DESTAQUE, weight=ft.FontWeight.BOLD)
                                     ])
@@ -179,7 +179,7 @@ def main(page: ft.Page):
                         )
             except Exception:
                 lista_produtos.controls.clear()
-                lista_produtos.controls.append(ft.Text("Erro de conexão.", color=COR_VERMELHO_ERRO, text_align=ft.TextAlign.CENTER))
+                lista_produtos.controls.append(ft.Text("Erro de ligação.", color=COR_VERMELHO_ERRO, text_align=ft.TextAlign.CENTER))
             page.update()
 
         view_estoque = ft.Column([
@@ -203,7 +203,7 @@ def main(page: ft.Page):
         venda_qtd_input = ft.TextField(label="Qtd", value="1", width=60, keyboard_type=ft.KeyboardType.NUMBER, border_color=COR_DESTAQUE, text_align=ft.TextAlign.CENTER)
         
         lbl_venda_nome = ft.Text("Nenhum produto...", size=16, weight=ft.FontWeight.BOLD, color=COR_TEXTO, overflow=ft.TextOverflow.ELLIPSIS, max_lines=1)
-        lbl_venda_info = ft.Text("Aguardando código ou busca.", size=13, color="gray")
+        lbl_venda_info = ft.Text("A aguardar código ou busca.", size=13, color="gray")
         
         lista_carrinho = ft.ListView(expand=True, spacing=5)
         lbl_total_carrinho = ft.Text("R$ 0.00", size=26, weight=ft.FontWeight.BOLD, color=COR_VERDE_SUCESSO)
@@ -245,7 +245,7 @@ def main(page: ft.Page):
             venda_cod_input.value = ""
             venda_qtd_input.value = "1"
             lbl_venda_nome.value = "Nenhum produto..."
-            lbl_venda_info.value = "Aguardando código ou busca."
+            lbl_venda_info.value = "A aguardar código ou busca."
             combo_pagamento.value = "Dinheiro"
             atualizar_ui_carrinho()
             mostrar_mensagem("Venda cancelada.", COR_VERMELHO_ERRO)
@@ -253,7 +253,7 @@ def main(page: ft.Page):
         def processar_leitura_venda(codigo):
             cod_limpo = str(codigo).strip()
             if not cod_limpo: return
-            lbl_venda_nome.value = "Buscando..."
+            lbl_venda_nome.value = "A buscar..."
             lbl_venda_info.value = ""
             page.update()
             
@@ -271,10 +271,10 @@ def main(page: ft.Page):
                         produto_atual_venda["custo"] = float(p.get('custo', 0.0))
                         produto_atual_venda["estoque"] = int(p.get('estoque', 0))
                         lbl_venda_nome.value = produto_atual_venda["nome"]
-                        lbl_venda_info.value = f"R$ {produto_atual_venda['preco']:.2f} | Estoque: {produto_atual_venda['estoque']}"
+                        lbl_venda_info.value = f"R$ {produto_atual_venda['preco']:.2f} | Stock: {produto_atual_venda['estoque']}"
                         mostrar_mensagem("Pronto para adicionar!", COR_BOTAO_PRINCIPAL)
                     else:
-                        lbl_venda_nome.value = "Não cadastrado!"
+                        lbl_venda_nome.value = "Não registado!"
                         lbl_venda_info.value = "Verifique o código."
                         produto_atual_venda["codigo"] = ""
                     page.update()
@@ -294,7 +294,7 @@ def main(page: ft.Page):
             
             qtd_ja_no_carrinho = sum(i['qtd'] for i in carrinho_mobile if i['codigo'] == produto_atual_venda["codigo"])
             if (qtd + qtd_ja_no_carrinho) > produto_atual_venda["estoque"]:
-                return mostrar_mensagem(f"Estoque insuficiente! (Disp: {produto_atual_venda['estoque']})", COR_VERMELHO_ERRO)
+                return mostrar_mensagem(f"Stock insuficiente! (Disp: {produto_atual_venda['estoque']})", COR_VERMELHO_ERRO)
                 
             subtotal = produto_atual_venda["preco"] * qtd
             item_existente = next((i for i in carrinho_mobile if i['codigo'] == produto_atual_venda["codigo"]), None)
@@ -368,7 +368,7 @@ def main(page: ft.Page):
         def executar_busca_nome(e):
             termo = busca_nome_input.value.strip()
             lista_busca_resultados.controls.clear()
-            lista_busca_resultados.controls.append(ft.Text("Buscando...", color="gray"))
+            lista_busca_resultados.controls.append(ft.Text("A buscar...", color="gray"))
             page.update()
             
             def buscar():
@@ -398,7 +398,7 @@ def main(page: ft.Page):
                     page.update()
                 except Exception:
                     lista_busca_resultados.controls.clear()
-                    lista_busca_resultados.controls.append(ft.Text("Erro de conexão.", color=COR_VERMELHO_ERRO))
+                    lista_busca_resultados.controls.append(ft.Text("Erro de ligação.", color=COR_VERMELHO_ERRO))
                     page.update()
             threading.Thread(target=buscar).start()
             
@@ -467,17 +467,17 @@ def main(page: ft.Page):
                                 req_patch = requests.patch(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}", headers=HEADERS, json={"estoque": novo_estoque}, timeout=5)
                                 if req_patch.ok and novo_estoque <= 2:
                                     alertas_estoque.append(item["nome"])
-                                    requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"Estoque baixo (Restam {novo_estoque})"}, timeout=5)
+                                    requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"Stock baixo (Restam {novo_estoque})"}, timeout=5)
                         
                         mostrar_mensagem(f"Venda Finalizada! (R$ {total_venda:.2f} via {forma_pagamento})", COR_VERDE_SUCESSO)
-                        if alertas_estoque: mostrar_mensagem(f"⚠️ {len(alertas_estoque)} itens com estoque crítico.", COR_DESTAQUE)
+                        if alertas_estoque: mostrar_mensagem(f"⚠️ {len(alertas_estoque)} itens com stock crítico.", COR_DESTAQUE)
                         
                         carrinho_mobile.clear()
                         produto_atual_venda["codigo"] = ""
                         venda_cod_input.value = ""
                         venda_qtd_input.value = "1"
                         lbl_venda_nome.value = "Nenhum produto..."
-                        lbl_venda_info.value = "Aguardando código ou busca."
+                        lbl_venda_info.value = "A aguardar código ou busca."
                         combo_pagamento.value = "Dinheiro"
                         page.update()
                         atualizar_ui_carrinho()
@@ -486,7 +486,7 @@ def main(page: ft.Page):
                 except Exception as e: 
                     mostrar_mensagem("Erro de rede no checkout.", COR_VERMELHO_ERRO)
             
-            mostrar_mensagem("Processando venda...", COR_BOTAO_PRINCIPAL)
+            mostrar_mensagem("A processar venda...", COR_BOTAO_PRINCIPAL)
             threading.Thread(target=enviar_nuvem).start()
 
         view_vender = ft.Column([
@@ -539,7 +539,7 @@ def main(page: ft.Page):
                     existentes = resp.json()
                     if existentes and isinstance(existentes, list) and len(existentes) > 0:
                         prod_antigo = existentes[0]
-                        aviso_conflito_txt.value = f"⚠️ Código já em uso: '{prod_antigo.get('nome')}' (Estoque: {prod_antigo.get('estoque')})"
+                        aviso_conflito_txt.value = f"⚠️ Código já em uso: '{prod_antigo.get('nome')}' (Stock: {prod_antigo.get('estoque')})"
                         aviso_conflito_txt.visible = True
                     else: aviso_conflito_txt.visible = False
                     page.update()
@@ -550,7 +550,7 @@ def main(page: ft.Page):
         cad_nome = ft.TextField(label="Nome do Produto", border_color=COR_DESTAQUE)
         cad_custo = ft.TextField(label="Custo (R$)", keyboard_type=ft.KeyboardType.NUMBER, border_color=COR_DESTAQUE)
         cad_preco = ft.TextField(label="Preço Venda (R$)", keyboard_type=ft.KeyboardType.NUMBER, border_color=COR_DESTAQUE)
-        cad_estoque = ft.TextField(label="Qtd. Estoque", keyboard_type=ft.KeyboardType.NUMBER, border_color=COR_DESTAQUE)
+        cad_estoque = ft.TextField(label="Qtd. Stock", keyboard_type=ft.KeyboardType.NUMBER, border_color=COR_DESTAQUE)
 
         def limpar_campos_cadastro():
             cad_codigo.value = ""; cad_nome.value = ""; cad_custo.value = ""; cad_preco.value = ""; cad_estoque.value = ""
@@ -569,8 +569,8 @@ def main(page: ft.Page):
                     cod_url = urllib.parse.quote(str(dados["codigo"]))
                     requests.patch(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}", headers=HEADERS, json=dados, timeout=8)
                 limpar_campos_cadastro()
-                mostrar_mensagem(f"'{dados['nome']}' salvo com sucesso!", COR_VERDE_SUCESSO)
-            except Exception: mostrar_mensagem("Erro de rede ao salvar!", COR_VERMELHO_ERRO)
+                mostrar_mensagem(f"'{dados['nome']}' guardado com sucesso!", COR_VERDE_SUCESSO)
+            except Exception: mostrar_mensagem("Erro de rede ao guardar!", COR_VERMELHO_ERRO)
 
         def abrir_modal_conflito(prod_existente, dados_novos):
             nome_antigo = prod_existente.get("nome", "Sem Nome")
@@ -581,18 +581,18 @@ def main(page: ft.Page):
                 dialog_conflito.open = False
                 novo_cod_exclusivo = str(random.randint(10000000, 99999999))
                 dados_novos["codigo"] = novo_cod_exclusivo
-                mostrar_mensagem(f"Salvando com novo código ({novo_cod_exclusivo})...", COR_DESTAQUE)
+                mostrar_mensagem(f"A guardar com novo código ({novo_cod_exclusivo})...", COR_DESTAQUE)
                 threading.Thread(target=gravar_no_banco_direto, args=(dados_novos, "inserir")).start()
 
             def acao_somar_estoque(e):
                 dialog_conflito.open = False
                 dados_novos["estoque"] = estoque_antigo + dados_novos["estoque"]
-                mostrar_mensagem("Somando estoque e atualizando...", COR_DESTAQUE)
+                mostrar_mensagem("A somar stock e a atualizar...", COR_DESTAQUE)
                 threading.Thread(target=gravar_no_banco_direto, args=(dados_novos, "atualizar")).start()
 
             def acao_substituir_tudo(e):
                 dialog_conflito.open = False
-                mostrar_mensagem("Substituindo produto antigo...", COR_DESTAQUE)
+                mostrar_mensagem("A substituir produto antigo...", COR_DESTAQUE)
                 threading.Thread(target=gravar_no_banco_direto, args=(dados_novos, "atualizar")).start()
 
             dialog_conflito = ft.AlertDialog(
@@ -601,11 +601,11 @@ def main(page: ft.Page):
                     width=310,
                     content=ft.Column([
                         ft.Text(f"O código {dados_novos['codigo']} já existe no sistema:", size=14),
-                        ft.Container(padding=10, bgcolor="#FFF3CD", border_radius=8, content=ft.Column([ft.Text(f"📦 Atual: {nome_antigo}", weight=ft.FontWeight.BOLD, color=COR_TEXTO), ft.Text(f"💰 Preço: R$ {preco_antigo:.2f} | Estoque: {estoque_antigo}", size=13, color="#856404")], spacing=4)),
-                        ft.Text(f"Você está tentando salvar: '{dados_novos['nome']}'", size=14, weight=ft.FontWeight.BOLD),
+                        ft.Container(padding=10, bgcolor="#FFF3CD", border_radius=8, content=ft.Column([ft.Text(f"📦 Atual: {nome_antigo}", weight=ft.FontWeight.BOLD, color=COR_TEXTO), ft.Text(f"💰 Preço: R$ {preco_antigo:.2f} | Stock: {estoque_antigo}", size=13, color="#856404")], spacing=4)),
+                        ft.Text(f"Está a tentar guardar: '{dados_novos['nome']}'", size=14, weight=ft.FontWeight.BOLD),
                         ft.Divider(), ft.Text("O que deseja fazer?", size=14, color="gray"),
                         botao_customizado("🎲 Gerar Novo Código (Manter os Dois)", COR_VERDE_SUCESSO, acao_gerar_novo_codigo, largura=300),
-                        botao_customizado(f"➕ Somar Estoque ({estoque_antigo} + {dados_novos['estoque']} = {estoque_antigo + dados_novos['estoque']})", COR_DESTAQUE, acao_somar_estoque, largura=300),
+                        botao_customizado(f"➕ Somar Stock ({estoque_antigo} + {dados_novos['estoque']} = {estoque_antigo + dados_novos['estoque']})", COR_DESTAQUE, acao_somar_estoque, largura=300),
                         botao_customizado("🔄 Substituir Produto Antigo", COR_VERMELHO_ERRO, acao_substituir_tudo, largura=300),
                     ], spacing=10, tight=True)
                 ), actions=[ft.Container(content=ft.Text("Cancelar", color="gray", weight=ft.FontWeight.BOLD), on_click=lambda e: [setattr(dialog_conflito, 'open', False), page.update()], padding=10)]
@@ -636,13 +636,13 @@ def main(page: ft.Page):
                         existentes = resp.json()
                         if existentes and isinstance(existentes, list) and len(existentes) > 0: abrir_modal_conflito(existentes[0], dados)
                         else: gravar_no_banco_direto(dados, "inserir")
-                    except Exception: mostrar_mensagem("Erro de rede verificando banco!", COR_VERMELHO_ERRO)
-                mostrar_mensagem("Verificando código na nuvem...", COR_DESTAQUE)
+                    except Exception: mostrar_mensagem("Erro de rede ao verificar base de dados!", COR_VERMELHO_ERRO)
+                mostrar_mensagem("A verificar código na nuvem...", COR_DESTAQUE)
                 threading.Thread(target=processo_verificar_e_salvar).start()
             except Exception: mostrar_mensagem("Valor inválido! Use apenas números.", COR_VERMELHO_ERRO)
 
         view_cadastrar = ft.Column([
-            ft.Container(content=ft.Text("Cadastro Rápido", size=24, weight=ft.FontWeight.BOLD, color="white"), bgcolor=COR_DESTAQUE, padding=15, alignment=ft.Alignment(0, 0)),
+            ft.Container(content=ft.Text("Registo Rápido", size=24, weight=ft.FontWeight.BOLD, color="white"), bgcolor=COR_DESTAQUE, padding=15, alignment=ft.Alignment(0, 0)),
             ft.Container(
                 content=ft.Column([
                     ft.Row([
@@ -651,7 +651,7 @@ def main(page: ft.Page):
                         botao_customizado("🎲", COR_DESTAQUE, gerar_codigo)
                     ]),
                     aviso_conflito_txt, cad_nome, cad_custo, cad_preco, cad_estoque,
-                    botao_customizado("💾 SALVAR PRODUTO", COR_VERDE_SUCESSO, salvar_produto, altura=50, expandir=True)
+                    botao_customizado("💾 GUARDAR PRODUTO", COR_VERDE_SUCESSO, salvar_produto, altura=50, expandir=True)
                 ], spacing=15, scroll=ft.ScrollMode.AUTO), padding=20, expand=True
             )
         ], expand=True, spacing=0, visible=False)
@@ -659,7 +659,7 @@ def main(page: ft.Page):
         # =====================================================================
         # TAB 4: RESTOCK LIST
         # =====================================================================
-        compra_nome = ft.TextField(label="O que está faltando?", border_color=COR_DESTAQUE)
+        compra_nome = ft.TextField(label="O que está a faltar?", border_color=COR_DESTAQUE)
         compra_obs = ft.TextField(label="Obs / Qtd (Opcional)", border_color=COR_DESTAQUE)
         lista_compras_view = ft.ListView(expand=True, spacing=10)
 
@@ -729,14 +729,14 @@ def main(page: ft.Page):
             elif idx == 3: carregar_compras()
             page.update()
 
-        # Correção Blindada Flet 1.0
+        # Correção Flet 1.0: Ícones básicos e obrigatórios para NavigationBarDestination
         page.navigation_bar = ft.NavigationBar(
             selected_index=0, bgcolor=COR_PAINEL, indicator_color=COR_FUNDO, on_change=mudar_aba,
             destinations=[
-                ft.NavigationBarDestination(label="📦 Consulta"),
-                ft.NavigationBarDestination(label="💰 Vender"),
-                ft.NavigationBarDestination(label="➕ Cadastrar"),
-                ft.NavigationBarDestination(label="🛒 Compras"),
+                ft.NavigationBarDestination(icon=ft.icons.LIST, label="Consulta"),
+                ft.NavigationBarDestination(icon=ft.icons.SELL, label="Vender"),
+                ft.NavigationBarDestination(icon=ft.icons.ADD, label="Cadastrar"),
+                ft.NavigationBarDestination(icon=ft.icons.SHOPPING_CART, label="Compras"),
             ]
         )
 
@@ -749,5 +749,4 @@ def main(page: ft.Page):
 
 if __name__ == "__main__":
     porta = int(os.environ.get("PORT", 8080))
-    # Correção: ft.run no lugar de ft.app
     ft.run(main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir="assets")
