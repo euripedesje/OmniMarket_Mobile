@@ -41,8 +41,7 @@ def main(page: ft.Page):
         page.bgcolor = COR_FUNDO
         page.padding = 0
         
-        # O Flet vai procurar isso dentro da pasta "assets" graças ao comando no final
-        page.window_icon = "icone.ico"
+        page.window_icon = "icon.png"
 
         def mostrar_mensagem(texto, cor):
             page.snack_bar = ft.SnackBar(ft.Text(texto, size=16, color="white"), bgcolor=cor)
@@ -134,11 +133,11 @@ def main(page: ft.Page):
             try:
                 termo_limpo = str(termo).strip() if termo else ""
                 if termo_limpo:
-                    if termo_limpo.isdigit(): resp = requests.get(f"{URL}/produtos?codigo=eq.{termo_limpo}&select=*", headers=HEADERS, timeout=8)
+                    if termo_limpo.isdigit(): resp = requests.get(f"{URL}/rest/v1/produtos?codigo=eq.{termo_limpo}&select=*", headers=HEADERS, timeout=8)
                     else:
                         termo_url = urllib.parse.quote(termo_limpo)
-                        resp = requests.get(f"{URL}/produtos?nome=ilike.*{termo_url}*&select=*", headers=HEADERS, timeout=8)
-                else: resp = requests.get(f"{URL}/produtos?order=pid.desc&limit=30&select=*", headers=HEADERS, timeout=8)
+                        resp = requests.get(f"{URL}/rest/v1/produtos?nome=ilike.*{termo_url}*&select=*", headers=HEADERS, timeout=8)
+                else: resp = requests.get(f"{URL}/rest/v1/produtos?order=pid.desc&limit=30&select=*", headers=HEADERS, timeout=8)
                     
                 produtos = resp.json()
                 lista_produtos.controls.clear()
@@ -245,7 +244,7 @@ def main(page: ft.Page):
             def buscar():
                 try:
                     cod_url = urllib.parse.quote(cod_limpo)
-                    resp = requests.get(f"{URL}/produtos?codigo=eq.{cod_url}&select=*", headers=HEADERS, timeout=5)
+                    resp = requests.get(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}&select=*", headers=HEADERS, timeout=5)
                     produtos = resp.json()
                     
                     if produtos and len(produtos) > 0:
@@ -360,8 +359,8 @@ def main(page: ft.Page):
                 try:
                     if termo:
                         termo_url = urllib.parse.quote(termo)
-                        resp = requests.get(f"{URL}/produtos?nome=ilike.*{termo_url}*&select=*", headers=HEADERS, timeout=5)
-                    else: resp = requests.get(f"{URL}/produtos?order=nome.asc&limit=30&select=*", headers=HEADERS, timeout=5)
+                        resp = requests.get(f"{URL}/rest/v1/produtos?nome=ilike.*{termo_url}*&select=*", headers=HEADERS, timeout=5)
+                    else: resp = requests.get(f"{URL}/rest/v1/produtos?order=nome.asc&limit=30&select=*", headers=HEADERS, timeout=5)
                         
                     produtos = resp.json()
                     lista_busca_resultados.controls.clear()
@@ -426,11 +425,11 @@ def main(page: ft.Page):
             def enviar_nuvem():
                 try:
                     venda_id = None
-                    req_venda = requests.post(f"{URL}/vendas", headers=HEADERS, json=dados_venda, timeout=8)
+                    req_venda = requests.post(f"{URL}/rest/v1/vendas", headers=HEADERS, json=dados_venda, timeout=8)
                     
                     if not req_venda.ok:
                         dados_venda_fallback = {"data_hora": data_atual, "total": total_venda, "forma_pagamento": forma_pagamento}
-                        req_venda = requests.post(f"{URL}/vendas", headers=HEADERS, json=dados_venda_fallback, timeout=8)
+                        req_venda = requests.post(f"{URL}/rest/v1/vendas", headers=HEADERS, json=dados_venda_fallback, timeout=8)
 
                     if req_venda.ok:
                         res_venda = req_venda.json()
@@ -441,18 +440,18 @@ def main(page: ft.Page):
                         for item in carrinho_mobile:
                             dados_item = {"venda_id": venda_id, "codigo_barras": item["codigo"], "nome_produto": item["nome"], "qtd": item["qtd"], "preco_unit": item["preco"], "custo_unit": item["custo"], "subtotal": item["subtotal"]}
                             
-                            req_item = requests.post(f"{URL}/itens_venda", headers=HEADERS, json=dados_item, timeout=8)
+                            req_item = requests.post(f"{URL}/rest/v1/itens_venda", headers=HEADERS, json=dados_item, timeout=8)
                             if not req_item.ok:
                                 dados_item_fallback = {"venda_id": venda_id, "codigo_barras": item["codigo"], "nome_produto": item["nome"], "qtd": item["qtd"], "preco_unit": item["preco"]}
-                                requests.post(f"{URL}/itens_venda", headers=HEADERS, json=dados_item_fallback, timeout=8)
+                                requests.post(f"{URL}/rest/v1/itens_venda", headers=HEADERS, json=dados_item_fallback, timeout=8)
                             
                             if item["codigo"] != "AVULSO":
                                 novo_estoque = item["estoque"] - item["qtd"]
                                 cod_url = urllib.parse.quote(item["codigo"])
-                                req_patch = requests.patch(f"{URL}/produtos?codigo=eq.{cod_url}", headers=HEADERS, json={"estoque": novo_estoque}, timeout=5)
+                                req_patch = requests.patch(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}", headers=HEADERS, json={"estoque": novo_estoque}, timeout=5)
                                 if req_patch.ok and novo_estoque <= 2:
                                     alertas_estoque.append(item["nome"])
-                                    requests.post(f"{URL}/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"Low stock (Remaining {novo_estoque})"}, timeout=5)
+                                    requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"Low stock (Remaining {novo_estoque})"}, timeout=5)
                         
                         mostrar_mensagem(f"Checkout Complete! ($ {total_venda:.2f} via {forma_pagamento})", COR_VERDE_SUCESSO)
                         if alertas_estoque: mostrar_mensagem(f"⚠️ {len(alertas_estoque)} items are low on stock.", COR_DESTAQUE)
@@ -520,7 +519,7 @@ def main(page: ft.Page):
             def checar():
                 try:
                     cod_limpo = urllib.parse.quote(str(codigo_verificar).strip())
-                    resp = requests.get(f"{URL}/produtos?codigo=eq.{cod_limpo}&select=*", headers=HEADERS, timeout=5)
+                    resp = requests.get(f"{URL}/rest/v1/produtos?codigo=eq.{cod_limpo}&select=*", headers=HEADERS, timeout=5)
                     existentes = resp.json()
                     if existentes and isinstance(existentes, list) and len(existentes) > 0:
                         prod_antigo = existentes[0]
@@ -549,10 +548,10 @@ def main(page: ft.Page):
 
         def gravar_no_banco_direto(dados, modo="inserir"):
             try:
-                if modo == "inserir": requests.post(f"{URL}/produtos", headers=HEADERS, json=dados, timeout=8)
+                if modo == "inserir": requests.post(f"{URL}/rest/v1/produtos", headers=HEADERS, json=dados, timeout=8)
                 elif modo == "atualizar":
                     cod_url = urllib.parse.quote(str(dados["codigo"]))
-                    requests.patch(f"{URL}/produtos?codigo=eq.{cod_url}", headers=HEADERS, json=dados, timeout=8)
+                    requests.patch(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}", headers=HEADERS, json=dados, timeout=8)
                 limpar_campos_cadastro()
                 mostrar_mensagem(f"'{dados['nome']}' saved successfully!", COR_VERDE_SUCESSO)
             except Exception: mostrar_mensagem("Network error while saving!", COR_VERMELHO_ERRO)
@@ -617,7 +616,7 @@ def main(page: ft.Page):
                 def processo_verificar_e_salvar():
                     try:
                         cod_url = urllib.parse.quote(codigo)
-                        resp = requests.get(f"{URL}/produtos?codigo=eq.{cod_url}&select=*", headers=HEADERS, timeout=8)
+                        resp = requests.get(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}&select=*", headers=HEADERS, timeout=8)
                         existentes = resp.json()
                         if existentes and isinstance(existentes, list) and len(existentes) > 0: abrir_modal_conflito(existentes[0], dados)
                         else: gravar_no_banco_direto(dados, "inserir")
@@ -651,7 +650,7 @@ def main(page: ft.Page):
         def carregar_compras():
             def processo_compras():
                 try:
-                    resp = requests.get(f"{URL}/lista_compras?select=*&order=id.desc", headers=HEADERS, timeout=8)
+                    resp = requests.get(f"{URL}/rest/v1/lista_compras?select=*&order=id.desc", headers=HEADERS, timeout=8)
                     lista_compras_view.controls.clear()
                     itens = resp.json()
                     if not itens: lista_compras_view.controls.append(ft.Text("Restock list is empty.", color="gray", text_align=ft.TextAlign.CENTER))
@@ -674,7 +673,7 @@ def main(page: ft.Page):
             page.update()
             def processo_add():
                 try:
-                    requests.post(f"{URL}/lista_compras", headers=HEADERS, json=dados, timeout=8)
+                    requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json=dados, timeout=8)
                     mostrar_mensagem("Added to restock list!", COR_VERDE_SUCESSO)
                     carregar_compras()
                 except Exception: mostrar_mensagem("Error adding item.", COR_VERMELHO_ERRO)
@@ -684,7 +683,7 @@ def main(page: ft.Page):
             item_id = e.control.data
             def processo_del():
                 try:
-                    requests.delete(f"{URL}/lista_compras?id=eq.{item_id}", headers=HEADERS, timeout=8)
+                    requests.delete(f"{URL}/rest/v1/lista_compras?id=eq.{item_id}", headers=HEADERS, timeout=8)
                     mostrar_mensagem("Item removed from list!", COR_VERDE_SUCESSO)
                     carregar_compras()
                 except Exception: pass
