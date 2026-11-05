@@ -8,7 +8,7 @@ from datetime import datetime, timezone, timedelta
 import os
 
 # =========================================================================
-# CLOUD CREDENTIALS & TIMEZONE (OMNIMARKET POS) 
+# CREDENCIAIS E LIGAÇÃO DIRETA À NUVEM (SUPABASE) E FUSO
 # =========================================================================
 URL = "https://vjytmsiicmmfynlolxrn.supabase.co"
 KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqeXRtc2lpY21tZnlubG9seHJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4MjI2MTUsImV4cCI6MjEwOTM5ODYxNX0.aavTQjTgsAK94cxWSxRoiMHAzg9f2EpCURgu9IVc6wI"
@@ -22,7 +22,7 @@ HEADERS = {
 }
 
 # =========================================================================
-# TECH CORPORATE PALETTE - OMNIMARKET POS
+# PALETA DE CORES DA MARCA - OMNIMARKET POS
 # =========================================================================
 COR_FUNDO = "#F0F4F8"           
 COR_PAINEL = "#FFFFFF"          
@@ -41,7 +41,7 @@ def main(page: ft.Page):
         page.theme_mode = ft.ThemeMode.LIGHT
         page.bgcolor = COR_FUNDO
         page.padding = 0
-        page.window_icon = "icone.ico"
+        page.window_icon = "icon.png"
 
         # 1. RETORNO TÁTIL (Vibração)
         hf = ft.HapticFeedback()
@@ -100,14 +100,13 @@ def main(page: ft.Page):
         ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
         bgcolor_topo = COR_BOTAO_PRINCIPAL
         
-        # AJUSTE: O nome do arquivo foi atualizado para o banner do OmniMarket
         if os.path.exists("assets/banner.png"):
-            icone_dash.icon_color = "white"
+            icone_dash.icon_color = COR_BOTAO_PRINCIPAL
             topo_app_content = ft.Row([
                 ft.Image(src="banner.png", fit=ft.ImageFit.CONTAIN, height=60),
                 icone_dash
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
-            bgcolor_topo = COR_BOTAO_PRINCIPAL
+            bgcolor_topo = COR_FUNDO
 
         topo_app = ft.Container(
             content=topo_app_content,
@@ -381,7 +380,7 @@ def main(page: ft.Page):
         def processar_leitura_venda(codigo):
             cod_limpo = str(codigo).strip()
             if not cod_limpo: return
-            lbl_venda_nome.value = "Procurando..."
+            lbl_venda_nome.value = "A buscar..."
             lbl_venda_info.value = ""
             page.update()
             
@@ -447,7 +446,7 @@ def main(page: ft.Page):
         # VENDA AVULSA (COM DESCRIÇÃO)
         # -------------------------------------------------------------
         avulso_desc_input = ft.TextField(label="Descrição Opcional", value="Produto Avulso", border_color=COR_DESTAQUE)
-        avulso_preco_input = ft.TextField(label="Preço do Produto (R$)", border_color=COR_DESTAQUE)
+        avulso_preco_input = ft.TextField(label="Preço do Produto (R$)", keyboard_type=ft.KeyboardType.NUMBER, border_color=COR_DESTAQUE)
         avulso_qtd_input = ft.TextField(label="Quantidade", value="1", keyboard_type=ft.KeyboardType.NUMBER, border_color=COR_DESTAQUE)
         
         def confirmar_avulso(e):
