@@ -24,7 +24,7 @@ jobs:
       - name: Preparar o Flutter (Versão 3.24 é obrigatória para Flet 0.24.1)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3'
+          flutter-version: '3.19.6'
           channel: 'stable'
 
       - name: Instalar ferramentas de extração do Linux
