@@ -170,9 +170,9 @@ def main(page: ft.Page):
             ft.Container(
                 content=ft.Row([
                     busca_input,
-                    # Correção: Mudança para 'CAMERA' garantindo compatibilidade.
-                    ft.IconButton(icon=ft.icons.CAMERA, icon_size=32, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
-                    ft.IconButton(icon=ft.icons.SEARCH, icon_size=32, icon_color=COR_DESTAQUE, on_click=lambda e: threading.Thread(target=carregar_estoque, args=(busca_input.value,)).start())
+                    # Correção: Uso de ElevatedButtons com Emojis em vez de ft.icons
+                    ft.ElevatedButton("📷", on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
+                    ft.ElevatedButton("🔍", on_click=lambda e: threading.Thread(target=carregar_estoque, args=(busca_input.value,)).start())
                 ]), padding=ft.padding.symmetric(horizontal=10, vertical=5)
             ), lista_produtos
         ], expand=True, spacing=0, visible=True)
@@ -210,7 +210,7 @@ def main(page: ft.Page):
                             content=ft.ListTile(
                                 title=ft.Text(f"{item['qtd']}x {item['nome']}", weight=ft.FontWeight.BOLD, size=14),
                                 subtitle=ft.Text(f"$ {item['preco']:.2f} ea | Sub: $ {item['subtotal']:.2f}", size=13),
-                                trailing=ft.IconButton(icon=ft.icons.DELETE, icon_color=COR_VERMELHO_ERRO, on_click=lambda e, i=idx: remover_do_carrinho(i))
+                                trailing=ft.ElevatedButton("❌", on_click=lambda e, i=idx: remover_do_carrinho(i))
                             )
                         )
                     )
@@ -393,7 +393,7 @@ def main(page: ft.Page):
             content=ft.Container(
                 width=320,
                 content=ft.Column([
-                    ft.Row([ft.Container(content=busca_nome_input, expand=True), ft.IconButton(icon=ft.icons.SEARCH, icon_color=COR_BOTAO_PRINCIPAL, on_click=executar_busca_nome)]),
+                    ft.Row([ft.Container(content=busca_nome_input, expand=True), ft.ElevatedButton("🔍", bgcolor=COR_BOTAO_PRINCIPAL, color="white", on_click=executar_busca_nome)]),
                     lista_busca_resultados
                 ], tight=True)
             ),
@@ -479,14 +479,14 @@ def main(page: ft.Page):
                 content=ft.Column([
                     ft.Row([
                         venda_cod_input,
-                        # Correção: O ícone CAMERA_ALT foi substituído por CAMERA para compatibilidade total.
-                        ft.IconButton(icon=ft.icons.CAMERA, icon_size=35, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(venda_cod_input, ao_ler_callback=processar_leitura_venda)),
-                        ft.IconButton(icon=ft.icons.SEARCH, icon_size=35, icon_color=COR_DESTAQUE, on_click=abrir_dialog_busca)
+                        # Correção: Uso de ElevatedButtons com Emojis
+                        ft.ElevatedButton("📷", on_click=lambda e: abrir_leitor_codigo(venda_cod_input, ao_ler_callback=processar_leitura_venda)),
+                        ft.ElevatedButton("🔍", on_click=abrir_dialog_busca)
                     ]),
                     ft.Row([
                         venda_qtd_input,
                         ft.Container(content=ft.Column([lbl_venda_nome, lbl_venda_info], spacing=2), expand=True),
-                        ft.IconButton(icon=ft.icons.ADD_CIRCLE, icon_size=45, icon_color=COR_VERDE_SUCESSO, on_click=adicionar_ao_carrinho)
+                        ft.ElevatedButton("➕", bgcolor=COR_VERDE_SUCESSO, color="white", on_click=adicionar_ao_carrinho)
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     
                     ft.ElevatedButton("🛒 ADD CUSTOM ITEM", width=float('inf'), height=40, bgcolor=COR_BOTAO_PRINCIPAL, color="white", on_click=abrir_dialog_avulso),
@@ -632,9 +632,9 @@ def main(page: ft.Page):
                 content=ft.Column([
                     ft.Row([
                         ft.Container(content=cad_codigo, expand=True),
-                        # Correção: Usar ft.icons.CAMERA
-                        ft.IconButton(icon=ft.icons.CAMERA, icon_size=35, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(cad_codigo, ao_ler_callback=verificar_codigo_existente)),
-                        ft.IconButton(icon=ft.icons.CASINO, icon_size=35, icon_color=COR_DESTAQUE, on_click=gerar_codigo)
+                        # Correção: Uso de ElevatedButtons com Emojis
+                        ft.ElevatedButton("📷", on_click=lambda e: abrir_leitor_codigo(cad_codigo, ao_ler_callback=verificar_codigo_existente)),
+                        ft.ElevatedButton("🎲", on_click=gerar_codigo)
                     ]),
                     aviso_conflito_txt, cad_nome, cad_custo, cad_preco, cad_estoque,
                     ft.ElevatedButton("💾 SAVE PRODUCT", height=50, bgcolor=COR_VERDE_SUCESSO, color="white", on_click=salvar_produto, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)))
@@ -661,7 +661,7 @@ def main(page: ft.Page):
                             lista_compras_view.controls.append(
                                 ft.Card(
                                     color=COR_PAINEL, elevation=2,
-                                    content=ft.ListTile(leading=ft.Icon(ft.icons.SHOPPING_BAG, color=COR_DESTAQUE), title=ft.Text(c.get('produto', ''), weight=ft.FontWeight.BOLD, color=COR_TEXTO), subtitle=ft.Text(c.get('observacao', '') or "No notes"), trailing=ft.IconButton(ft.icons.DELETE_OUTLINE, icon_color=COR_VERMELHO_ERRO, data=c.get('id'), on_click=deletar_compra))
+                                    content=ft.ListTile(leading=ft.Text("🛍️", size=20), title=ft.Text(c.get('produto', ''), weight=ft.FontWeight.BOLD, color=COR_TEXTO), subtitle=ft.Text(c.get('observacao', '') or "No notes"), trailing=ft.ElevatedButton("❌", on_click=deletar_compra, data=c.get('id')))
                                 )
                             )
                     page.update()
@@ -715,13 +715,14 @@ def main(page: ft.Page):
             elif idx == 3: carregar_compras()
             page.update()
 
+        # Correção: Uso de ícones básicos suportados na NavigationBar ou emojis.
         page.navigation_bar = ft.NavigationBar(
             selected_index=0, bgcolor=COR_PAINEL, indicator_color=COR_FUNDO, on_change=mudar_aba,
             destinations=[
-                ft.NavigationDestination(icon=ft.icons.INVENTORY_2_OUTLINED, selected_icon=ft.icons.INVENTORY_2, label="Inventory"),
-                ft.NavigationDestination(icon=ft.icons.POINT_OF_SALE_OUTLINED, selected_icon=ft.icons.POINT_OF_SALE, label="POS"),
-                ft.NavigationDestination(icon=ft.icons.ADD_BOX_OUTLINED, selected_icon=ft.icons.ADD_BOX, label="Register"),
-                ft.NavigationDestination(icon=ft.icons.SHOPPING_CART_OUTLINED, selected_icon=ft.icons.SHOPPING_CART, label="Restock"),
+                ft.NavigationDestination(icon=ft.icons.INVENTORY_2_OUTLINED, label="Inventory"),
+                ft.NavigationDestination(icon=ft.icons.POINT_OF_SALE_OUTLINED, label="POS"),
+                ft.NavigationDestination(icon=ft.icons.ADD_BOX_OUTLINED, label="Register"),
+                ft.NavigationDestination(icon=ft.icons.SHOPPING_CART_OUTLINED, label="Restock"),
             ]
         )
 
