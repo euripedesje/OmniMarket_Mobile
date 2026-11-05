@@ -1,18 +1,32 @@
 import flet as ft
-import requests
-import random
-import threading
 import traceback
-import urllib.parse
-from datetime import datetime, timezone, timedelta
-import os
+
+# =========================================================================
+# BLINDAGEM DE IMPORTAÇÕES (Evita tela preta silenciosa)
+# =========================================================================
+IMPORTS_OK = True
+ERRO_IMPORT = ""
+
+try:
+    import requests
+    import random
+    import threading
+    import urllib.parse
+    from datetime import datetime, timezone, timedelta
+    import os
+except Exception as e:
+    IMPORTS_OK = False
+    ERRO_IMPORT = traceback.format_exc()
 
 # =========================================================================
 # CLOUD CREDENTIALS & TIMEZONE (OMNIMARKET POS)
 # =========================================================================
 URL = "https://vjytmsiicmmfynlolxrn.supabase.co"
 KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqeXRtc2lpY21tZnlubG9seHJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4MjI2MTUsImV4cCI6MjEwOTM5ODYxNX0.aavTQjTgsAK94cxWSxRoiMHAzg9f2EpCURgu9IVc6wI"
-FUSO_BR = timezone(timedelta(hours=-3))
+try:
+    FUSO_BR = timezone(timedelta(hours=-3))
+except:
+    FUSO_BR = None
 
 HEADERS = {
     "apikey": KEY,
@@ -33,16 +47,29 @@ COR_VERDE_SUCESSO = "#27AE60"
 COR_VERMELHO_ERRO = "#C0392B"   
 
 def main(page: ft.Page):
+    # Se o Python falhou ao carregar as bibliotecas, exibe o erro na tela (Sem tela preta)
+    if not IMPORTS_OK:
+        page.add(
+            ft.Container(
+                padding=20,
+                content=ft.Column([
+                    ft.Text("🚨 CRITICAL IMPORT ERROR", color="red", weight=ft.FontWeight.BOLD, size=20),
+                    ft.Text("A library is missing in the APK payload.", size=14, color="black"),
+                    ft.Text(ERRO_IMPORT, color="red", size=12)
+                ], scroll=ft.ScrollMode.AUTO)
+            )
+        )
+        page.update()
+        return
+
     try:
+        # Configurações 100% nativas para Mobile (Sem propriedades de Janela Desktop)
         page.title = "OmniMarket POS"
-        page.window_width = 420
-        page.window_height = 800
         page.theme_mode = ft.ThemeMode.LIGHT
         page.bgcolor = COR_FUNDO
         page.padding = 0
-        page.window_icon = "icon.png"
 
-        # 1. HAPTIC FEEDBACK (Vibration)
+        # HAPTIC FEEDBACK (Vibration)
         hf = ft.HapticFeedback()
         page.overlay.append(hf)
 
@@ -52,7 +79,7 @@ def main(page: ft.Page):
             page.update()
 
         # =====================================================================
-        # 4. MINI-DASHBOARD (Daily Summary)
+        # MINI-DASHBOARD (Daily Summary)
         # =====================================================================
         def abrir_dashboard():
             def carregar():
@@ -790,7 +817,7 @@ def main(page: ft.Page):
 
             def acao_substituir_tudo(e):
                 dialog_conflito.open = False
-                mostrar_mensagem("Overwriting previous product...", COR_DESTAQUE)
+                mostrar_mensagem("Overwrite previous product...", COR_DESTAQUE)
                 threading.Thread(target=gravar_no_banco_direto, args=(dados_novos, "atualizar")).start()
 
             dialog_conflito = ft.AlertDialog(
