@@ -15,16 +15,16 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Preparar o Java (Obrigatório para Android)
+      - name: Preparar o Java
         uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Preparar o Flutter
+      - name: Preparar o Flutter compatível com Flet 0.23.2
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.2'
+          flutter-version: '3.19.6'
           channel: 'stable'
 
       - name: Instalar ferramentas de extração do Linux
