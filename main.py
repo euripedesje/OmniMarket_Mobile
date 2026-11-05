@@ -172,7 +172,7 @@ def main(page: ft.Page):
                     busca_input,
                     ft.Button("📷", on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
                     ft.Button("🔍", on_click=lambda e: threading.Thread(target=carregar_estoque, args=(busca_input.value,)).start())
-                ]), padding=10 # Substituição de padding.symmetric e padding.only
+                ]), padding=10
             ), lista_produtos
         ], expand=True, spacing=0, visible=True)
 
@@ -491,7 +491,8 @@ def main(page: ft.Page):
                     
                     ft.Divider(color=COR_DESTAQUE),
                     ft.Text("🛒 Shopping Cart:", weight=ft.FontWeight.BOLD),
-                    ft.Container(content=lista_carrinho, expand=True, border=ft.border.all(1, COR_DESTAQUE), border_radius=8, padding=5, bgcolor="#FDF8F0"),
+                    # Correção Flet 1.0: Remover borda problemática. 
+                    ft.Container(content=lista_carrinho, expand=True, border_radius=8, padding=5, bgcolor="#FDF8F0"),
                     ft.Divider(color=COR_DESTAQUE),
                     ft.Row([ft.Text("Total:", size=22, weight=ft.FontWeight.BOLD, color=COR_TEXTO), lbl_total_carrinho], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Row([ft.Text("Tender:", weight=ft.FontWeight.BOLD), combo_pagamento]),
@@ -712,7 +713,6 @@ def main(page: ft.Page):
             elif idx == 3: carregar_compras()
             page.update()
 
-        # Correção: O Flet 1.0 parou de suportar ícones de fundo. Vamos usar os nomes das abas como botões.
         page.navigation_bar = ft.NavigationBar(
             selected_index=0, bgcolor=COR_PAINEL, indicator_color=COR_FUNDO, on_change=mudar_aba,
             destinations=[
