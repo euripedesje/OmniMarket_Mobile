@@ -59,7 +59,6 @@ def main(page: ft.Page):
             width=float('inf')
         )
         
-        # Correção Blindada Flet 1.0: Remover parâmetros de fit 
         if os.path.exists("assets/banner.png"):
             topo_app = ft.Container(
                 content=ft.Image(src="banner.png", height=60),
@@ -171,8 +170,8 @@ def main(page: ft.Page):
             ft.Container(
                 content=ft.Row([
                     busca_input,
-                    # Correção: O ícone 'QR_CODE_SCANNER' foi removido no Flet 1.0. Substituído por 'CAMERA_ALT' para manter a semântica visual.
-                    ft.IconButton(icon=ft.icons.CAMERA_ALT, icon_size=32, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
+                    # Correção: Mudança para 'CAMERA' garantindo compatibilidade.
+                    ft.IconButton(icon=ft.icons.CAMERA, icon_size=32, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
                     ft.IconButton(icon=ft.icons.SEARCH, icon_size=32, icon_color=COR_DESTAQUE, on_click=lambda e: threading.Thread(target=carregar_estoque, args=(busca_input.value,)).start())
                 ]), padding=ft.padding.symmetric(horizontal=10, vertical=5)
             ), lista_produtos
@@ -480,8 +479,8 @@ def main(page: ft.Page):
                 content=ft.Column([
                     ft.Row([
                         venda_cod_input,
-                        # Correção: O ícone 'QR_CODE_SCANNER' foi substituído por 'CAMERA_ALT' para resolver compatibilidade com Flet 1.0.
-                        ft.IconButton(icon=ft.icons.CAMERA_ALT, icon_size=35, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(venda_cod_input, ao_ler_callback=processar_leitura_venda)),
+                        # Correção: O ícone CAMERA_ALT foi substituído por CAMERA para compatibilidade total.
+                        ft.IconButton(icon=ft.icons.CAMERA, icon_size=35, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(venda_cod_input, ao_ler_callback=processar_leitura_venda)),
                         ft.IconButton(icon=ft.icons.SEARCH, icon_size=35, icon_color=COR_DESTAQUE, on_click=abrir_dialog_busca)
                     ]),
                     ft.Row([
@@ -633,8 +632,8 @@ def main(page: ft.Page):
                 content=ft.Column([
                     ft.Row([
                         ft.Container(content=cad_codigo, expand=True),
-                        # Correção: O ícone 'QR_CODE_SCANNER' foi substituído por 'CAMERA_ALT' para compatibilidade com Flet 1.0.
-                        ft.IconButton(icon=ft.icons.CAMERA_ALT, icon_size=35, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(cad_codigo, ao_ler_callback=verificar_codigo_existente)),
+                        # Correção: Usar ft.icons.CAMERA
+                        ft.IconButton(icon=ft.icons.CAMERA, icon_size=35, icon_color=COR_BOTAO_PRINCIPAL, on_click=lambda e: abrir_leitor_codigo(cad_codigo, ao_ler_callback=verificar_codigo_existente)),
                         ft.IconButton(icon=ft.icons.CASINO, icon_size=35, icon_color=COR_DESTAQUE, on_click=gerar_codigo)
                     ]),
                     aviso_conflito_txt, cad_nome, cad_custo, cad_preco, cad_estoque,
