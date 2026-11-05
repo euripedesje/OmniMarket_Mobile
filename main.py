@@ -729,14 +729,14 @@ def main(page: ft.Page):
             elif idx == 3: carregar_compras()
             page.update()
 
-        # Correção Flet 1.0: Ícones básicos e obrigatórios para NavigationBarDestination
+        # Correção Definitiva Flet 1.0: Usar strings diretas para contornar o módulo ft.icons
         page.navigation_bar = ft.NavigationBar(
             selected_index=0, bgcolor=COR_PAINEL, indicator_color=COR_FUNDO, on_change=mudar_aba,
             destinations=[
-                ft.NavigationBarDestination(icon=ft.icons.LIST, label="Consulta"),
-                ft.NavigationBarDestination(icon=ft.icons.SELL, label="Vender"),
-                ft.NavigationBarDestination(icon=ft.icons.ADD, label="Cadastrar"),
-                ft.NavigationBarDestination(icon=ft.icons.SHOPPING_CART, label="Compras"),
+                ft.NavigationBarDestination(icon="list", label="Consulta"),
+                ft.NavigationBarDestination(icon="point_of_sale", label="Vender"),
+                ft.NavigationBarDestination(icon="add", label="Cadastrar"),
+                ft.NavigationBarDestination(icon="shopping_cart", label="Compras"),
             ]
         )
 
