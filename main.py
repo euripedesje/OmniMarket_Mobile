@@ -102,14 +102,14 @@ def main(page: ft.Page):
                 content=ft.Container(
                     width=310,
                     content=ft.Column([
-                        ft.ElevatedButton("📷 OPEN CAMERA SCANNER", bgcolor=COR_BOTAO_PRINCIPAL, color="white", height=45, width=300, on_click=abrir_camera_externa),
-                        ft.ElevatedButton("📋 PASTE SCANNED CODE", bgcolor=COR_DESTAQUE, color="white", height=45, width=300, on_click=colar_da_area_transferencia),
+                        ft.Button("📷 OPEN CAMERA SCANNER", bgcolor=COR_BOTAO_PRINCIPAL, color="white", height=45, width=300, on_click=abrir_camera_externa),
+                        ft.Button("📋 PASTE SCANNED CODE", bgcolor=COR_DESTAQUE, color="white", height=45, width=300, on_click=colar_da_area_transferencia),
                         ft.Divider(color=COR_DESTAQUE), input_manual,
                     ], spacing=10, tight=True)
                 ),
                 actions=[
                     ft.TextButton("Cancel", on_click=fechar_dialog),
-                    ft.ElevatedButton("Confirm", bgcolor=COR_VERDE_SUCESSO, color="white", on_click=lambda e: confirmar_codigo(input_manual.value))
+                    ft.Button("Confirm", bgcolor=COR_VERDE_SUCESSO, color="white", on_click=lambda e: confirmar_codigo(input_manual.value))
                 ], actions_alignment=ft.MainAxisAlignment.END
             )
             page.dialog = dialog_camera
@@ -170,9 +170,8 @@ def main(page: ft.Page):
             ft.Container(
                 content=ft.Row([
                     busca_input,
-                    # Correção: Uso de ElevatedButtons com Emojis em vez de ft.icons
-                    ft.ElevatedButton("📷", on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
-                    ft.ElevatedButton("🔍", on_click=lambda e: threading.Thread(target=carregar_estoque, args=(busca_input.value,)).start())
+                    ft.Button("📷", on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
+                    ft.Button("🔍", on_click=lambda e: threading.Thread(target=carregar_estoque, args=(busca_input.value,)).start())
                 ]), padding=ft.padding.symmetric(horizontal=10, vertical=5)
             ), lista_produtos
         ], expand=True, spacing=0, visible=True)
@@ -210,7 +209,7 @@ def main(page: ft.Page):
                             content=ft.ListTile(
                                 title=ft.Text(f"{item['qtd']}x {item['nome']}", weight=ft.FontWeight.BOLD, size=14),
                                 subtitle=ft.Text(f"$ {item['preco']:.2f} ea | Sub: $ {item['subtotal']:.2f}", size=13),
-                                trailing=ft.ElevatedButton("❌", on_click=lambda e, i=idx: remover_do_carrinho(i))
+                                trailing=ft.Button("❌", on_click=lambda e, i=idx: remover_do_carrinho(i))
                             )
                         )
                     )
@@ -327,7 +326,7 @@ def main(page: ft.Page):
             content=ft.Column([avulso_desc_input, avulso_preco_input, avulso_qtd_input], tight=True),
             actions=[
                 ft.TextButton("Cancel", on_click=lambda e: fechar_dialog_avulso()),
-                ft.ElevatedButton("Add to Cart", bgcolor=COR_VERDE_SUCESSO, color="white", on_click=confirmar_avulso)
+                ft.Button("Add to Cart", bgcolor=COR_VERDE_SUCESSO, color="white", on_click=confirmar_avulso)
             ]
         )
 
@@ -393,7 +392,7 @@ def main(page: ft.Page):
             content=ft.Container(
                 width=320,
                 content=ft.Column([
-                    ft.Row([ft.Container(content=busca_nome_input, expand=True), ft.ElevatedButton("🔍", bgcolor=COR_BOTAO_PRINCIPAL, color="white", on_click=executar_busca_nome)]),
+                    ft.Row([ft.Container(content=busca_nome_input, expand=True), ft.Button("🔍", bgcolor=COR_BOTAO_PRINCIPAL, color="white", on_click=executar_busca_nome)]),
                     lista_busca_resultados
                 ], tight=True)
             ),
@@ -479,17 +478,16 @@ def main(page: ft.Page):
                 content=ft.Column([
                     ft.Row([
                         venda_cod_input,
-                        # Correção: Uso de ElevatedButtons com Emojis
-                        ft.ElevatedButton("📷", on_click=lambda e: abrir_leitor_codigo(venda_cod_input, ao_ler_callback=processar_leitura_venda)),
-                        ft.ElevatedButton("🔍", on_click=abrir_dialog_busca)
+                        ft.Button("📷", on_click=lambda e: abrir_leitor_codigo(venda_cod_input, ao_ler_callback=processar_leitura_venda)),
+                        ft.Button("🔍", on_click=abrir_dialog_busca)
                     ]),
                     ft.Row([
                         venda_qtd_input,
                         ft.Container(content=ft.Column([lbl_venda_nome, lbl_venda_info], spacing=2), expand=True),
-                        ft.ElevatedButton("➕", bgcolor=COR_VERDE_SUCESSO, color="white", on_click=adicionar_ao_carrinho)
+                        ft.Button("➕", bgcolor=COR_VERDE_SUCESSO, color="white", on_click=adicionar_ao_carrinho)
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     
-                    ft.ElevatedButton("🛒 ADD CUSTOM ITEM", width=float('inf'), height=40, bgcolor=COR_BOTAO_PRINCIPAL, color="white", on_click=abrir_dialog_avulso),
+                    ft.Button("🛒 ADD CUSTOM ITEM", width=float('inf'), height=40, bgcolor=COR_BOTAO_PRINCIPAL, color="white", on_click=abrir_dialog_avulso),
                     
                     ft.Divider(color=COR_DESTAQUE),
                     ft.Text("🛒 Shopping Cart:", weight=ft.FontWeight.BOLD),
@@ -498,8 +496,8 @@ def main(page: ft.Page):
                     ft.Row([ft.Text("Total:", size=22, weight=ft.FontWeight.BOLD, color=COR_TEXTO), lbl_total_carrinho], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                     ft.Row([ft.Text("Tender:", weight=ft.FontWeight.BOLD), combo_pagamento]),
                     ft.Row([
-                        ft.ElevatedButton("CANCEL", expand=True, height=50, bgcolor=COR_VERMELHO_ERRO, color="white", on_click=cancelar_venda),
-                        ft.ElevatedButton("CHECKOUT", expand=True, height=50, bgcolor=COR_VERDE_SUCESSO, color="white", on_click=finalizar_venda)
+                        ft.Button("CANCEL", expand=True, height=50, bgcolor=COR_VERMELHO_ERRO, color="white", on_click=cancelar_venda),
+                        ft.Button("CHECKOUT", expand=True, height=50, bgcolor=COR_VERDE_SUCESSO, color="white", on_click=finalizar_venda)
                     ], spacing=10)
                 ], spacing=10, expand=True), padding=15, expand=True
             )
@@ -589,9 +587,9 @@ def main(page: ft.Page):
                         ft.Container(padding=10, bgcolor="#FFF3CD", border_radius=8, content=ft.Column([ft.Text(f"📦 Current: {nome_antigo}", weight=ft.FontWeight.BOLD, color=COR_TEXTO), ft.Text(f"💰 Price: $ {preco_antigo:.2f} | Stock: {estoque_antigo}", size=13, color="#856404")], spacing=4)),
                         ft.Text(f"You are trying to save: '{dados_novos['nome']}'", size=14, weight=ft.FontWeight.BOLD),
                         ft.Divider(), ft.Text("What do you want to do?", size=14, color="gray"),
-                        ft.ElevatedButton("🎲 Generate New Barcode (Keep Both)", bgcolor=COR_VERDE_SUCESSO, color="white", width=300, on_click=acao_gerar_novo_codigo),
-                        ft.ElevatedButton(f"➕ Add Stock ({estoque_antigo} + {dados_novos['estoque']} = {estoque_antigo + dados_novos['estoque']})", bgcolor=COR_DESTAQUE, color="white", width=300, on_click=acao_somar_estoque),
-                        ft.ElevatedButton("🔄 Overwrite Old Product", bgcolor=COR_VERMELHO_ERRO, color="white", width=300, on_click=acao_substituir_tudo),
+                        ft.Button("🎲 Generate New Barcode (Keep Both)", bgcolor=COR_VERDE_SUCESSO, color="white", width=300, on_click=acao_gerar_novo_codigo),
+                        ft.Button(f"➕ Add Stock ({estoque_antigo} + {dados_novos['estoque']} = {estoque_antigo + dados_novos['estoque']})", bgcolor=COR_DESTAQUE, color="white", width=300, on_click=acao_somar_estoque),
+                        ft.Button("🔄 Overwrite Old Product", bgcolor=COR_VERMELHO_ERRO, color="white", width=300, on_click=acao_substituir_tudo),
                     ], spacing=10, tight=True)
                 ), actions=[ft.TextButton("Cancel", on_click=lambda e: [setattr(dialog_conflito, 'open', False), page.update()])]
             )
@@ -632,12 +630,11 @@ def main(page: ft.Page):
                 content=ft.Column([
                     ft.Row([
                         ft.Container(content=cad_codigo, expand=True),
-                        # Correção: Uso de ElevatedButtons com Emojis
-                        ft.ElevatedButton("📷", on_click=lambda e: abrir_leitor_codigo(cad_codigo, ao_ler_callback=verificar_codigo_existente)),
-                        ft.ElevatedButton("🎲", on_click=gerar_codigo)
+                        ft.Button("📷", on_click=lambda e: abrir_leitor_codigo(cad_codigo, ao_ler_callback=verificar_codigo_existente)),
+                        ft.Button("🎲", on_click=gerar_codigo)
                     ]),
                     aviso_conflito_txt, cad_nome, cad_custo, cad_preco, cad_estoque,
-                    ft.ElevatedButton("💾 SAVE PRODUCT", height=50, bgcolor=COR_VERDE_SUCESSO, color="white", on_click=salvar_produto, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)))
+                    ft.Button("💾 SAVE PRODUCT", height=50, bgcolor=COR_VERDE_SUCESSO, color="white", on_click=salvar_produto, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10)))
                 ], spacing=15, scroll=ft.ScrollMode.AUTO), padding=20, expand=True
             )
         ], expand=True, spacing=0, visible=False)
@@ -661,7 +658,7 @@ def main(page: ft.Page):
                             lista_compras_view.controls.append(
                                 ft.Card(
                                     color=COR_PAINEL, elevation=2,
-                                    content=ft.ListTile(leading=ft.Text("🛍️", size=20), title=ft.Text(c.get('produto', ''), weight=ft.FontWeight.BOLD, color=COR_TEXTO), subtitle=ft.Text(c.get('observacao', '') or "No notes"), trailing=ft.ElevatedButton("❌", on_click=deletar_compra, data=c.get('id')))
+                                    content=ft.ListTile(leading=ft.Text("🛍️", size=20), title=ft.Text(c.get('produto', ''), weight=ft.FontWeight.BOLD, color=COR_TEXTO), subtitle=ft.Text(c.get('observacao', '') or "No notes"), trailing=ft.Button("❌", on_click=deletar_compra, data=c.get('id')))
                                 )
                             )
                     page.update()
@@ -696,7 +693,7 @@ def main(page: ft.Page):
             ft.Container(
                 content=ft.Column([
                     compra_nome, compra_obs,
-                    ft.ElevatedButton("➕ ADD TO LIST", height=45, bgcolor=COR_DESTAQUE, color="white", on_click=adicionar_compra, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))),
+                    ft.Button("➕ ADD TO LIST", height=45, bgcolor=COR_DESTAQUE, color="white", on_click=adicionar_compra, style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=10))),
                     ft.Divider(color=COR_DESTAQUE), lista_compras_view
                 ], spacing=10, expand=True), padding=20, expand=True
             )
@@ -715,7 +712,6 @@ def main(page: ft.Page):
             elif idx == 3: carregar_compras()
             page.update()
 
-        # Correção: Uso de ícones básicos suportados na NavigationBar ou emojis.
         page.navigation_bar = ft.NavigationBar(
             selected_index=0, bgcolor=COR_PAINEL, indicator_color=COR_FUNDO, on_change=mudar_aba,
             destinations=[
