@@ -21,10 +21,10 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Preparar o Flutter compatível com Flet 0.23.2
+      - name: Preparar o Flutter (Versão 3.24 é obrigatória para Flet 0.24.1)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.22.2'
+          flutter-version: '3.24.3'
           channel: 'stable'
 
       - name: Instalar ferramentas de extração do Linux
