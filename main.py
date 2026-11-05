@@ -55,7 +55,7 @@ def main(page: ft.Page):
             content=ft.Text("OmniMarket POS", size=24, weight=ft.FontWeight.BOLD, color="white"),
             bgcolor=COR_BOTAO_PRINCIPAL,
             padding=20,
-            alignment=ft.alignment.center,
+            alignment=ft.Alignment(0, 0),
             width=float('inf')
         )
         
@@ -63,7 +63,7 @@ def main(page: ft.Page):
         if os.path.exists("assets/banner.png"):
             topo_app = ft.Container(
                 content=ft.Image(src="banner.png", fit=ft.ImageFit.CONTAIN, height=60),
-                bgcolor=COR_BOTAO_PRINCIPAL, padding=10, alignment=ft.alignment.center, width=float('inf')
+                bgcolor=COR_BOTAO_PRINCIPAL, padding=10, alignment=ft.Alignment(0, 0), width=float('inf')
             )
 
         # =====================================================================
@@ -474,7 +474,7 @@ def main(page: ft.Page):
             threading.Thread(target=enviar_nuvem).start()
 
         view_vender = ft.Column([
-            ft.Container(content=ft.Text("Point of Sale (POS)", size=22, weight=ft.FontWeight.BOLD, color="white"), bgcolor=COR_VERDE_SUCESSO, padding=12, alignment=ft.alignment.center),
+            ft.Container(content=ft.Text("Point of Sale (POS)", size=22, weight=ft.FontWeight.BOLD, color="white"), bgcolor=COR_VERDE_SUCESSO, padding=12, alignment=ft.Alignment(0, 0)),
             ft.Container(
                 content=ft.Column([
                     ft.Row([
@@ -626,7 +626,7 @@ def main(page: ft.Page):
             except Exception: mostrar_mensagem("Value error! Use numbers only.", COR_VERMELHO_ERRO)
 
         view_cadastrar = ft.Column([
-            ft.Container(content=ft.Text("Quick Register", size=24, weight=ft.FontWeight.BOLD, color="white"), bgcolor=COR_DESTAQUE, padding=15, alignment=ft.alignment.center),
+            ft.Container(content=ft.Text("Quick Register", size=24, weight=ft.FontWeight.BOLD, color="white"), bgcolor=COR_DESTAQUE, padding=15, alignment=ft.Alignment(0, 0)),
             ft.Container(
                 content=ft.Column([
                     ft.Row([
@@ -690,7 +690,7 @@ def main(page: ft.Page):
             threading.Thread(target=processo_del).start()
 
         view_compras = ft.Column([
-            ft.Container(content=ft.Text("Restock List", size=24, weight=ft.FontWeight.BOLD, color="white"), bgcolor=COR_BOTAO_PRINCIPAL, padding=15, alignment=ft.alignment.center),
+            ft.Container(content=ft.Text("Restock List", size=24, weight=ft.FontWeight.BOLD, color="white"), bgcolor=COR_BOTAO_PRINCIPAL, padding=15, alignment=ft.Alignment(0, 0)),
             ft.Container(
                 content=ft.Column([
                     compra_nome, compra_obs,
