@@ -59,10 +59,10 @@ def main(page: ft.Page):
             width=float('inf')
         )
         
-        # Se a imagem banner.png existir na pasta assets, ela será usada.
+        # Correção do Flet 1.0: Usar ft.Fit em vez de ft.ImageFit
         if os.path.exists("assets/banner.png"):
             topo_app = ft.Container(
-                content=ft.Image(src="banner.png", fit=ft.ImageFit.CONTAIN, height=60),
+                content=ft.Image(src="banner.png", fit=ft.Fit.CONTAIN, height=60),
                 bgcolor=COR_BOTAO_PRINCIPAL, padding=10, alignment=ft.Alignment(0, 0), width=float('inf')
             )
 
@@ -732,4 +732,4 @@ def main(page: ft.Page):
 
 if __name__ == "__main__":
     porta = int(os.environ.get("PORT", 8080))
-    ft.run(main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir="assets")
+    ft.run(main, view=ft.AppView.WEB_BROWSER, host="0.0.0.0", port=porta, assets_dir="assets", title="OmniMarket POS")
