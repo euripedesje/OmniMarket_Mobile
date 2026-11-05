@@ -5,7 +5,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: Baixar o código
         uses: actions/checkout@v4
@@ -15,31 +15,28 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Preparar o Java
+      - name: Preparar o Java (Obrigatório para Android)
         uses: actions/setup-java@v5
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Preparar o motor de Aplicativos (Flutter)
+      - name: Preparar o Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.22.2'
           channel: 'stable'
 
-      - name: Resolver exigencias do Linux
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev mesa-utils
-          yes | flutter doctor --android-licenses || true
+      - name: Instalar ferramentas de extração do Linux
+        run: sudo apt-get update && sudo apt-get install -y xz-utils tar curl zip unzip
 
-      - name: Instalar Bibliotecas
+      - name: Instalar Flet e Bibliotecas
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Construir o APK
-        run: flet build apk -v
+        run: flet build apk
 
       - name: Guardar o Aplicativo Pronto
         uses: actions/upload-artifact@v4
