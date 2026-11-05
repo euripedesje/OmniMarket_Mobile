@@ -39,9 +39,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Construir o APK
-        run: |
-          set +o pipefail
-          yes | flet build apk
+        run: flet build apk -v
 
       - name: Guardar o Aplicativo Pronto
         uses: actions/upload-artifact@v4
