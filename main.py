@@ -172,7 +172,7 @@ def main(page: ft.Page):
                     busca_input,
                     ft.Button("📷", on_click=lambda e: abrir_leitor_codigo(busca_input, ao_ler_callback=lambda cod: threading.Thread(target=carregar_estoque, args=(cod,)).start())),
                     ft.Button("🔍", on_click=lambda e: threading.Thread(target=carregar_estoque, args=(busca_input.value,)).start())
-                ]), padding=ft.padding.symmetric(horizontal=10, vertical=5)
+                ]), padding=ft.padding.only(left=10, right=10, top=5, bottom=5)
             ), lista_produtos
         ], expand=True, spacing=0, visible=True)
 
