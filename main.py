@@ -59,10 +59,10 @@ def main(page: ft.Page):
             width=float('inf')
         )
         
-        # Correção do Flet 1.0: Usar ft.Fit em vez de ft.ImageFit
+        # Correção Blindada Flet 1.0: Remover parâmetros de fit 
         if os.path.exists("assets/banner.png"):
             topo_app = ft.Container(
-                content=ft.Image(src="banner.png", fit=ft.Fit.CONTAIN, height=60),
+                content=ft.Image(src="banner.png", height=60),
                 bgcolor=COR_BOTAO_PRINCIPAL, padding=10, alignment=ft.Alignment(0, 0), width=float('inf')
             )
 
