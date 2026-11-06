@@ -66,7 +66,7 @@ def main(page: ft.Page):
             def carregar():
                 hoje_str = datetime.now(FUSO_BR).strftime('%Y-%m-%d')
                 try:
-                    resp = requests.get(f"{URL}/rest/v1/vendas?order=id.desc&limit=1000&select=*", headers=HEADERS, timeout=5)
+                    resp = requests.get(f"{URL}/rest/v1/vendas?order=id.desc&limit=5000&select=*", headers=HEADERS, timeout=5)
                     if resp.ok:
                         vendas = resp.json()
                         vendas_hoje = [v for v in vendas if str(v.get('data_hora', '')).startswith(hoje_str)]
@@ -227,11 +227,11 @@ def main(page: ft.Page):
 
                 termo_limpo = str(termo).strip() if termo else ""
                 if termo_limpo:
-                    if termo_limpo.isdigit(): resp = requests.get(f"{URL}/rest/v1/produtos?codigo=eq.{termo_limpo}&select=*&{ordem_param}&limit=2000", headers=HEADERS, timeout=8)
+                    if termo_limpo.isdigit(): resp = requests.get(f"{URL}/rest/v1/produtos?codigo=eq.{termo_limpo}&select=*&{ordem_param}&limit=5000", headers=HEADERS, timeout=8)
                     else:
                         termo_url = urllib.parse.quote(termo_limpo)
-                        resp = requests.get(f"{URL}/rest/v1/produtos?nome=ilike.*{termo_url}*&select=*&{ordem_param}&limit=2000", headers=HEADERS, timeout=8)
-                else: resp = requests.get(f"{URL}/rest/v1/produtos?select=*&{ordem_param}&limit=2000", headers=HEADERS, timeout=8)
+                        resp = requests.get(f"{URL}/rest/v1/produtos?nome=ilike.*{termo_url}*&select=*&{ordem_param}&limit=5000", headers=HEADERS, timeout=8)
+                else: resp = requests.get(f"{URL}/rest/v1/produtos?select=*&{ordem_param}&limit=5000", headers=HEADERS, timeout=8)
                     
                 produtos = resp.json()
                 lista_produtos.controls.clear()
@@ -414,7 +414,7 @@ def main(page: ft.Page):
         def carregar_dados_busca():
             nonlocal produtos_em_memoria
             try:
-                resp = requests.get(f"{URL}/rest/v1/produtos?order=nome.asc&select=*&limit=1000", headers=HEADERS, timeout=8)
+                resp = requests.get(f"{URL}/rest/v1/produtos?order=nome.asc&select=*&limit=5000", headers=HEADERS, timeout=8)
                 if resp.ok:
                     produtos_em_memoria = resp.json()
                     executar_busca_nome_local(None)
