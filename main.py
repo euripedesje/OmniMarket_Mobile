@@ -1,6 +1,7 @@
 import flet as ft
 import traceback
 import sys
+import os
 
 def main(page: ft.Page):
     # =========================================================================
@@ -25,7 +26,6 @@ def main(page: ft.Page):
         import threading
         import urllib.parse
         from datetime import datetime, timezone, timedelta
-        import os
 
         URL = "https://vjytmsiicmmfynlolxrn.supabase.co"
         KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZqeXRtc2lpY21tZnlubG9seHJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM4MjI2MTUsImV4cCI6MjEwOTM5ODYxNX0.aavTQjTgsAK94cxWSxRoiMHAzg9f2EpCURgu9IVc6wI"
