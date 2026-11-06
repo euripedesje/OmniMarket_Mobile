@@ -21,10 +21,10 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Preparar o Flutter
+      - name: Preparar o Flutter (Obrigatório 3.22.2)
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'
+          flutter-version: '3.22.2'
           channel: 'stable'
 
       - name: Instalar ferramentas de extração
