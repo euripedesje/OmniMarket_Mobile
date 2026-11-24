@@ -5,6 +5,39 @@ import traceback
 import sys
 import os
 
+# Textos usados dentro de f-strings (compativel com Python 3.11 do Android)
+_TXT = [
+    "📅 Today: ",
+    "Sales made: ",
+    "Revenue: ",
+    "Code: ",
+    "SKU: ",
+    "Stock: ",
+    " ea | Sub: ",
+    "Removed: ",
+    " | Stock: ",
+    "Insufficient stock! (Avail: ",
+    " | Stock: ",
+    "*OMNIMARKET POS*\n_Sales Receipt_\n\n*Items:*\n",
+    "\n*Total:* ",
+    "\n*Tender:* ",
+    "\n\nThank you for your business!",
+    "Low stock (Remaining ",
+    "Checkout Complete! (",
+    " items are low on stock.",
+    "⚠️ Barcode already used by: '",
+    "' (Stock: ",
+    "' saved successfully!",
+    "Saving with new barcode (",
+    "The barcode ",
+    " is already in the system:",
+    "📦 Current: ",
+    "💰 Price: ",
+    " | Stock: ",
+    "You are trying to save: '",
+    "➕ Add Stock",
+]
+
 def main(page: ft.Page):
     # =========================================================================
     # 1. IMEDIATAMENTE DESENHAR A INTERFACE (Cura a tela preta)
@@ -200,9 +233,9 @@ def main(page: ft.Page):
                             qtd = len(vendas_hoje)
                         
                             dlg_dash.content = ft.Column([
-                                ft.Text(f"{T("📅 Today: ")}{datetime.now(FUSO_BR).strftime('%m/%d/%Y')}", weight=ft.FontWeight.BOLD),
-                                ft.Text(f"{T("Sales made: ")}{qtd}", size=16),
-                                ft.Text(f"{T("Revenue: ")}{MOEDA} {total:.2f}", color=COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=22)
+                                ft.Text(f"{T(_TXT[0])}{datetime.now(FUSO_BR).strftime('%m/%d/%Y')}", weight=ft.FontWeight.BOLD),
+                                ft.Text(f"{T(_TXT[1])}{qtd}", size=16),
+                                ft.Text(f"{T(_TXT[2])}{MOEDA} {total:.2f}", color=COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=22)
                             ], tight=True)
                             page.update()
                         else:
@@ -254,7 +287,7 @@ def main(page: ft.Page):
                         dialog_camera.open = False
                         page.update()
                         hf.heavy_impact() 
-                        mostrar_mensagem(f"{T("Code: ")}{codigo_final}", COR_VERDE_SUCESSO)
+                        mostrar_mensagem(f"{T(_TXT[3])}{codigo_final}", COR_VERDE_SUCESSO)
                         if ao_ler_callback: ao_ler_callback(codigo_final)
                 def colar_da_area_transferencia(e):
                     try:
@@ -371,7 +404,7 @@ def main(page: ft.Page):
                             lista_produtos.controls.append(
                                 ft.Card(content=ft.Container(padding=15, content=ft.Column([
                                     ft.Text(p.get('nome', T('No Name')), weight=ft.FontWeight.BOLD, size=18, color=COR_TEXTO),
-                                    ft.Row([ft.Text(f"{T("SKU: ")}{p.get('codigo', '')}", color="gray", size=14), ft.Text(f"{T("Stock: ")}{estoque_atual}", color=COR_VERMELHO_ERRO if estoque_atual <= 2 else COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=14)], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                                    ft.Row([ft.Text(f"{T(_TXT[4])}{p.get('codigo', '')}", color="gray", size=14), ft.Text(f"{T(_TXT[5])}{estoque_atual}", color=COR_VERMELHO_ERRO if estoque_atual <= 2 else COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=14)], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                                     ft.Row([ft.Text(f"{MOEDA} {float(p.get('preco', 0.0)):.2f}", size=20, color=COR_DESTAQUE, weight=ft.FontWeight.BOLD), ft.IconButton(icon=ft.icons.EDIT, icon_color=COR_BOTAO_PRINCIPAL, tooltip=T("Edit"), on_click=lambda e, prod=p: abrir_edicao_modal(prod))], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                                 ])), color=COR_PAINEL, elevation=3)
                             )
@@ -412,7 +445,7 @@ def main(page: ft.Page):
                     for idx, item in enumerate(carrinho_mobile):
                         total_venda += item['subtotal']
                         lista_carrinho.controls.append(
-                            ft.Card(elevation=1, color=COR_PAINEL, content=ft.ListTile(title=ft.Text(f"{item['qtd']}x {item['nome']}", weight=ft.FontWeight.BOLD, size=14), subtitle=ft.Text(f"{MOEDA} {item['preco']:.2f}{T(" ea | Sub: ")}{MOEDA} {item['subtotal']:.2f}", size=13), trailing=ft.IconButton(icon=ft.icons.DELETE, icon_color=COR_VERMELHO_ERRO, on_click=lambda e, i=idx: remover_do_carrinho(i))))
+                            ft.Card(elevation=1, color=COR_PAINEL, content=ft.ListTile(title=ft.Text(f"{item['qtd']}x {item['nome']}", weight=ft.FontWeight.BOLD, size=14), subtitle=ft.Text(f"{MOEDA} {item['preco']:.2f}{T(_TXT[6])}{MOEDA} {item['subtotal']:.2f}", size=13), trailing=ft.IconButton(icon=ft.icons.DELETE, icon_color=COR_VERMELHO_ERRO, on_click=lambda e, i=idx: remover_do_carrinho(i))))
                         )
                 lbl_total_carrinho.value = f"{MOEDA} {total_venda:.2f}"
                 page.update()
@@ -420,7 +453,7 @@ def main(page: ft.Page):
             def remover_do_carrinho(index):
                 if 0 <= index < len(carrinho_mobile):
                     removido = carrinho_mobile.pop(index)
-                    mostrar_mensagem(f"{T("Removed: ")}{removido['nome']}", COR_DESTAQUE)
+                    mostrar_mensagem(f"{T(_TXT[7])}{removido['nome']}", COR_DESTAQUE)
                     atualizar_ui_carrinho()
 
             def cancelar_venda(e=None):
@@ -451,7 +484,7 @@ def main(page: ft.Page):
                             produto_atual_venda["custo"] = float(p.get('custo', 0.0))
                             produto_atual_venda["estoque"] = int(p.get('estoque', 0))
                             lbl_venda_nome.value = produto_atual_venda["nome"]
-                            lbl_venda_info.value = f"{MOEDA} {produto_atual_venda['preco']:.2f}{T(" | Stock: ")}{produto_atual_venda['estoque']}"
+                            lbl_venda_info.value = f"{MOEDA} {produto_atual_venda['preco']:.2f}{T(_TXT[8])}{produto_atual_venda['estoque']}"
                             hf.heavy_impact() 
                             mostrar_mensagem(T("Item ready to add!"), COR_BOTAO_PRINCIPAL)
                         else:
@@ -475,7 +508,7 @@ def main(page: ft.Page):
             
                 qtd_ja_no_carrinho = sum(i['qtd'] for i in carrinho_mobile if i['codigo'] == produto_atual_venda["codigo"])
                 if (qtd + qtd_ja_no_carrinho) > produto_atual_venda["estoque"]:
-                    return mostrar_mensagem(f"{T("Insufficient stock! (Avail: ")}{produto_atual_venda['estoque']})", COR_VERMELHO_ERRO)
+                    return mostrar_mensagem(f"{T(_TXT[9])}{produto_atual_venda['estoque']})", COR_VERMELHO_ERRO)
                 
                 subtotal = produto_atual_venda["preco"] * qtd
                 item_existente = next((i for i in carrinho_mobile if i['codigo'] == produto_atual_venda["codigo"]), None)
@@ -536,7 +569,7 @@ def main(page: ft.Page):
                             venda_cod_input.value = cod
                             page.update()
                             processar_leitura_venda(cod)
-                        lista_busca_resultados.controls.append(ft.ListTile(title=ft.Text(p.get('nome', ''), weight=ft.FontWeight.BOLD), subtitle=ft.Text(f"{MOEDA} {p.get('preco', 0):.2f}{T(" | Stock: ")}{p.get('estoque', 0)}"), on_click=selecionar))
+                        lista_busca_resultados.controls.append(ft.ListTile(title=ft.Text(p.get('nome', ''), weight=ft.FontWeight.BOLD), subtitle=ft.Text(f"{MOEDA} {p.get('preco', 0):.2f}{T(_TXT[10])}{p.get('estoque', 0)}"), on_click=selecionar))
                 page.update()
 
             busca_nome_input = ft.TextField(label=T("Type name here..."), border_color=COR_DESTAQUE, on_change=executar_busca_nome_local)
@@ -564,7 +597,7 @@ def main(page: ft.Page):
             def perguntar_whatsapp(total, pagamento, itens_copia):
                 msg_itens = ""
                 for i in itens_copia: msg_itens += f"• {i['qtd']}x {i['nome']} ({MOEDA} {i['preco']:.2f}) = {MOEDA} {i['subtotal']:.2f}\n"
-                texto_zap = f"{T("*OMNIMARKET POS*\n_Sales Receipt_\n\n*Items:*\n")}{msg_itens}{T("\n*Total:* ")}{MOEDA} {total:.2f}{T("\n*Tender:* ")}{pagamento}{T("\n\nThank you for your business!")}"
+                texto_zap = f"{T(_TXT[11])}{msg_itens}{T(_TXT[12])}{MOEDA} {total:.2f}{T(_TXT[13])}{pagamento}{T(_TXT[14])}"
                 texto_zap_encoded = urllib.parse.quote(texto_zap)
                 link_zap = f"https://wa.me/?text={texto_zap_encoded}"
 
@@ -645,10 +678,10 @@ def main(page: ft.Page):
                                 novo_estoque = estoques_novos.get(str(item["codigo"]))
                                 if novo_estoque is not None and novo_estoque <= 2 and item["nome"] not in alertas_estoque:
                                     alertas_estoque.append(item["nome"])
-                                    requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"{T("Low stock (Remaining ")}{novo_estoque})"}, timeout=5)
+                                    requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"{T(_TXT[15])}{novo_estoque})"}, timeout=5)
 
-                            mostrar_mensagem(f"{T("Checkout Complete! (")}{MOEDA} {total_venda:.2f})", COR_VERDE_SUCESSO)
-                            if alertas_estoque: mostrar_mensagem(f"⚠️ {len(alertas_estoque)}{T(" items are low on stock.")}", COR_DESTAQUE)
+                            mostrar_mensagem(f"{T(_TXT[16])}{MOEDA} {total_venda:.2f})", COR_VERDE_SUCESSO)
+                            if alertas_estoque: mostrar_mensagem(f"⚠️ {len(alertas_estoque)}{T(_TXT[17])}", COR_DESTAQUE)
                         
                             carrinho_mobile.clear()
                             produto_atual_venda["codigo"] = ""; venda_cod_input.value = ""; venda_qtd_input.value = "1"
@@ -695,7 +728,7 @@ def main(page: ft.Page):
                         existentes = resp.json()
                         if existentes and isinstance(existentes, list) and len(existentes) > 0:
                             prod_antigo = existentes[0]
-                            aviso_conflito_txt.value = f"{T("⚠️ Barcode already used by: '")}{prod_antigo.get('nome')}{T("' (Stock: ")}{prod_antigo.get('estoque')})"
+                            aviso_conflito_txt.value = f"{T(_TXT[18])}{prod_antigo.get('nome')}{T(_TXT[19])}{prod_antigo.get('estoque')})"
                             aviso_conflito_txt.visible = True
                         else: aviso_conflito_txt.visible = False
                         page.update()
@@ -719,7 +752,7 @@ def main(page: ft.Page):
                         cod_url = urllib.parse.quote(str(dados["codigo"]))
                         requests.patch(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}", headers=HEADERS, json=dados, timeout=8)
                     limpar_campos_cadastro()
-                    mostrar_mensagem(f"'{dados['nome']}{T("' saved successfully!")}", COR_VERDE_SUCESSO)
+                    mostrar_mensagem(f"'{dados['nome']}{T(_TXT[20])}", COR_VERDE_SUCESSO)
                 except Exception: mostrar_mensagem(T("Network error while saving!"), COR_VERMELHO_ERRO)
 
             def abrir_modal_conflito(prod_existente, dados_novos):
@@ -727,7 +760,7 @@ def main(page: ft.Page):
                 def acao_gerar_novo_codigo(e):
                     dialog_conflito.open = False
                     novo_cod_exclusivo = str(random.randint(10000000, 99999999)); dados_novos["codigo"] = novo_cod_exclusivo
-                    mostrar_mensagem(f"{T("Saving with new barcode (")}{novo_cod_exclusivo})...", COR_DESTAQUE)
+                    mostrar_mensagem(f"{T(_TXT[21])}{novo_cod_exclusivo})...", COR_DESTAQUE)
                     threading.Thread(target=gravar_no_banco_direto, args=(dados_novos, "inserir")).start()
                 def acao_somar_estoque(e):
                     dialog_conflito.open = False
@@ -742,11 +775,11 @@ def main(page: ft.Page):
                 dialog_conflito = ft.AlertDialog(
                     modal=True, title=ft.Text(T("⚠️ Duplicate Barcode!"), size=18, weight=ft.FontWeight.BOLD, color=COR_VERMELHO_ERRO),
                     content=ft.Container(width=310, content=ft.Column([
-                        ft.Text(f"{T("The barcode ")}{dados_novos['codigo']}{T(" is already in the system:")}", size=14),
-                        ft.Container(padding=10, bgcolor="#FFF3CD", border_radius=8, content=ft.Column([ft.Text(f"{T("📦 Current: ")}{nome_antigo}", weight=ft.FontWeight.BOLD, color=COR_TEXTO), ft.Text(f"{T("💰 Price: ")}{MOEDA} {preco_antigo:.2f}{T(" | Stock: ")}{estoque_antigo}", size=13, color="#856404")], spacing=4)),
-                        ft.Text(f"{T("You are trying to save: '")}{dados_novos['nome']}'", size=14, weight=ft.FontWeight.BOLD), ft.Divider(), ft.Text(T("What do you want to do?"), size=14, color="gray"),
+                        ft.Text(f"{T(_TXT[22])}{dados_novos['codigo']}{T(_TXT[23])}", size=14),
+                        ft.Container(padding=10, bgcolor="#FFF3CD", border_radius=8, content=ft.Column([ft.Text(f"{T(_TXT[24])}{nome_antigo}", weight=ft.FontWeight.BOLD, color=COR_TEXTO), ft.Text(f"{T(_TXT[25])}{MOEDA} {preco_antigo:.2f}{T(_TXT[26])}{estoque_antigo}", size=13, color="#856404")], spacing=4)),
+                        ft.Text(f"{T(_TXT[27])}{dados_novos['nome']}'", size=14, weight=ft.FontWeight.BOLD), ft.Divider(), ft.Text(T("What do you want to do?"), size=14, color="gray"),
                         ft.ElevatedButton(T("🎲 Generate New Barcode"), bgcolor=COR_VERDE_SUCESSO, color="white", width=300, on_click=acao_gerar_novo_codigo),
-                        ft.ElevatedButton(f"{T("➕ Add Stock")}", bgcolor=COR_DESTAQUE, color="white", width=300, on_click=acao_somar_estoque),
+                        ft.ElevatedButton(f"{T(_TXT[28])}", bgcolor=COR_DESTAQUE, color="white", width=300, on_click=acao_somar_estoque),
                         ft.ElevatedButton(T("🔄 Overwrite Old Product"), bgcolor=COR_VERMELHO_ERRO, color="white", width=300, on_click=acao_substituir_tudo),
                     ], spacing=10, tight=True)), actions=[ft.TextButton(T("Cancel"), on_click=lambda e: [setattr(dialog_conflito, 'open', False), page.update()])]
                 )
