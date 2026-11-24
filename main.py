@@ -41,6 +41,17 @@ def main(page: ft.Page):
             "Prefer": "return=representation"
         }
 
+        def get_todos(url_base, timeout=8):
+            """Busca todas as linhas em paginas de 1000 (o Supabase corta em 1000 sem avisar)."""
+            todas, offset = [], 0
+            while True:
+                r = requests.get(f"{url_base}&limit=1000&offset={offset}", headers=HEADERS, timeout=timeout)
+                r.raise_for_status()
+                lote = r.json()
+                todas.extend(lote)
+                if len(lote) < 1000: return todas
+                offset += 1000
+
         COR_FUNDO = "#F0F4F8"           
         COR_PAINEL = "#FFFFFF"          
         COR_TEXTO = "#102A43"           
@@ -66,7 +77,8 @@ def main(page: ft.Page):
             def carregar():
                 hoje_str = datetime.now(FUSO_BR).strftime('%Y-%m-%d')
                 try:
-                    resp = requests.get(f"{URL}/rest/v1/vendas?order=id.desc&limit=5000&select=*", headers=HEADERS, timeout=5)
+                    inicio_url = urllib.parse.quote(f"{hoje_str} 00:00:00")
+                    resp = requests.get(f"{URL}/rest/v1/vendas?data_hora=gte.{inicio_url}&select=*&limit=1000", headers=HEADERS, timeout=8)
                     if resp.ok:
                         vendas = resp.json()
                         vendas_hoje = [v for v in vendas if str(v.get('data_hora', '')).startswith(hoje_str)]
@@ -400,8 +412,9 @@ def main(page: ft.Page):
         def executar_busca_nome_local(e):
             termo = busca_nome_input.value.strip().lower()
             lista_busca_resultados.controls.clear()
-            for p in produtos_em_memoria:
-                if not termo or termo in str(p.get('nome', '')).lower() or termo in str(p.get('codigo', '')):
+            encontrados = [p for p in produtos_em_memoria if not termo or termo in str(p.get('nome', '')).lower() or termo in str(p.get('codigo', ''))]
+            for p in encontrados[:50]:  # desenhar milhares de linhas trava o celular
+                if True:
                     def selecionar(e, cod=p.get('codigo')):
                         dialog_busca.open = False
                         venda_cod_input.value = cod
@@ -414,12 +427,8 @@ def main(page: ft.Page):
         def carregar_dados_busca():
             nonlocal produtos_em_memoria
             try:
-                resp = requests.get(f"{URL}/rest/v1/produtos?order=nome.asc&select=*&limit=5000", headers=HEADERS, timeout=8)
-                if resp.ok:
-                    produtos_em_memoria = resp.json()
-                    executar_busca_nome_local(None)
-                else:
-                    lista_busca_resultados.controls.clear(); lista_busca_resultados.controls.append(ft.Text("Failed to load.", color=COR_VERMELHO_ERRO)); page.update()
+                produtos_em_memoria = get_todos(f"{URL}/rest/v1/produtos?order=nome.asc&select=codigo,nome,preco,estoque")
+                executar_busca_nome_local(None)
             except Exception:
                 lista_busca_resultados.controls.clear(); lista_busca_resultados.controls.append(ft.Text("Connection error.", color=COR_VERMELHO_ERRO)); page.update()
 
@@ -454,8 +463,11 @@ def main(page: ft.Page):
             dlg_zap.open = True
             page.update()
 
+        estado_checkout = {"enviando": False}
         def finalizar_venda(e):
+            if estado_checkout["enviando"]: return mostrar_mensagem("Please wait, sale in progress...", COR_DESTAQUE)
             if not carrinho_mobile: return mostrar_mensagem("Cart is empty!", COR_VERMELHO_ERRO)
+            estado_checkout["enviando"] = True
             total_venda = sum(i['subtotal'] for i in carrinho_mobile)
             forma_pagamento = combo_pagamento.value
             carrinho_mobile_copia = carrinho_mobile.copy() 
@@ -479,6 +491,7 @@ def main(page: ft.Page):
                             colunas_existentes = list(req_map.json()[0].keys()) if req_map.ok and isinstance(req_map.json(), list) and len(req_map.json()) > 0 else []
                         except: colunas_existentes = []
                         
+                        lista_itens = []
                         for item in carrinho_mobile:
                             dados_item = {"venda_id": venda_id}
                             if colunas_existentes:
@@ -493,16 +506,31 @@ def main(page: ft.Page):
                                 if "subtotal" in colunas_existentes: dados_item["subtotal"] = float(item['subtotal'])
                                 elif "total" in colunas_existentes: dados_item["total"] = float(item['subtotal'])
                             else: dados_item = {"venda_id": venda_id, "produto": item['nome'], "quantidade": item['qtd'], "preco": item['preco']}
-                            requests.post(f"{URL}/rest/v1/itens_venda", headers=HEADERS, json=dados_item, timeout=8)
-                            
-                            if item["codigo"] != "AVULSO":
-                                novo_estoque = item["estoque"] - item["qtd"]
-                                cod_url = urllib.parse.quote(item["codigo"])
-                                req_patch = requests.patch(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}", headers=HEADERS, json={"estoque": novo_estoque}, timeout=5)
-                                if req_patch.ok and novo_estoque <= 2:
-                                    alertas_estoque.append(item["nome"])
-                                    requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"Low stock (Remaining {novo_estoque})"}, timeout=5)
-                        
+                            lista_itens.append(dados_item)
+                        if lista_itens:  # todos os itens numa requisicao so
+                            requests.post(f"{URL}/rest/v1/itens_venda", headers=HEADERS, json=lista_itens, timeout=10)
+
+                        # Baixa de estoque atomica no servidor (usa o estoque ATUAL, nao o de quando o item foi bipado)
+                        baixas = [{"codigo": str(i["codigo"]), "qtd": int(i["qtd"])} for i in carrinho_mobile if i["codigo"] != "AVULSO"]
+                        estoques_novos = {}
+                        if baixas:
+                            r_rpc = requests.post(f"{URL}/rest/v1/rpc/baixar_estoque_lote", headers=HEADERS, json={"itens": baixas}, timeout=10)
+                            if r_rpc.ok and isinstance(r_rpc.json(), list):
+                                estoques_novos = {str(x.get("codigo")): int(x.get("estoque", 0)) for x in r_rpc.json()}
+                            else:  # Plano B (funcao SQL ainda nao criada): le o estoque atual e atualiza
+                                for b in baixas:
+                                    cod_url = urllib.parse.quote(b["codigo"])
+                                    r_atual = requests.get(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}&select=estoque", headers=HEADERS, timeout=5)
+                                    if r_atual.ok and r_atual.json():
+                                        novo = int(r_atual.json()[0].get("estoque", 0)) - b["qtd"]
+                                        if requests.patch(f"{URL}/rest/v1/produtos?codigo=eq.{cod_url}", headers=HEADERS, json={"estoque": novo}, timeout=5).ok:
+                                            estoques_novos[b["codigo"]] = novo
+                        for item in carrinho_mobile:
+                            novo_estoque = estoques_novos.get(str(item["codigo"]))
+                            if novo_estoque is not None and novo_estoque <= 2 and item["nome"] not in alertas_estoque:
+                                alertas_estoque.append(item["nome"])
+                                requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"Low stock (Remaining {novo_estoque})"}, timeout=5)
+
                         mostrar_mensagem(f"Checkout Complete! ($ {total_venda:.2f})", COR_VERDE_SUCESSO)
                         if alertas_estoque: mostrar_mensagem(f"⚠️ {len(alertas_estoque)} items are low on stock.", COR_DESTAQUE)
                         
@@ -515,6 +543,7 @@ def main(page: ft.Page):
                         perguntar_whatsapp(total_venda, forma_pagamento, carrinho_mobile_copia)
                     else: mostrar_mensagem("Failed to create sale ID.", COR_VERMELHO_ERRO)
                 except Exception as e: mostrar_mensagem("Network error during checkout.", COR_VERMELHO_ERRO)
+                finally: estado_checkout["enviando"] = False
             
             mostrar_mensagem("Processing checkout...", COR_BOTAO_PRINCIPAL)
             threading.Thread(target=enviar_nuvem).start()
