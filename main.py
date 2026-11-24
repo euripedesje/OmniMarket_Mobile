@@ -59,6 +59,9 @@ def main(page: ft.Page):
         COR_BOTAO_PRINCIPAL = "#0B3954" 
         COR_VERDE_SUCESSO = "#27AE60"   
         COR_VERMELHO_ERRO = "#C0392B"   
+        MOEDA = "$"
+        NOME_LOJA = "OmniMarket POS"
+        BANNER_URL = None
 
         # =====================================================================
         # LOGIN DA LOJA (cada loja so enxerga os proprios dados)
@@ -87,8 +90,26 @@ def main(page: ft.Page):
                 time.sleep(45 * 60)   # o token vale 1 hora: renova antes de expirar
                 renovar_token()
 
+        def carregar_personalizacao():
+            nonlocal MOEDA, NOME_LOJA, BANNER_URL, COR_FUNDO, COR_DESTAQUE, COR_BOTAO_PRINCIPAL
+            try:
+                r = requests.get(f"{URL}/rest/v1/lojas?select=*&limit=1", headers=HEADERS, timeout=8)
+                if r.ok and r.json():
+                    cfg = r.json()[0]
+                    NOME_LOJA = cfg.get("nome") or NOME_LOJA
+                    MOEDA = (cfg.get("moeda") or MOEDA).strip()
+                    BANNER_URL = cfg.get("banner_url") or cfg.get("logo_url")
+                    COR_BOTAO_PRINCIPAL = cfg.get("cor_principal") or COR_BOTAO_PRINCIPAL
+                    COR_DESTAQUE = cfg.get("cor_destaque") or COR_DESTAQUE
+                    COR_FUNDO = cfg.get("cor_fundo") or COR_FUNDO
+                    page.bgcolor = COR_FUNDO
+                    page.title = NOME_LOJA
+            except Exception:
+                pass
+
         def iniciar_app():
             try:
+                carregar_personalizacao()
                 threading.Thread(target=manter_sessao, daemon=True).start()
                 montar_app()
             except Exception:
@@ -170,7 +191,7 @@ def main(page: ft.Page):
                             dlg_dash.content = ft.Column([
                                 ft.Text(f"📅 Today: {datetime.now(FUSO_BR).strftime('%m/%d/%Y')}", weight=ft.FontWeight.BOLD),
                                 ft.Text(f"Sales made: {qtd}", size=16),
-                                ft.Text(f"Revenue: $ {total:.2f}", color=COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=22)
+                                ft.Text(f"Revenue: {MOEDA} {total:.2f}", color=COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=22)
                             ], tight=True)
                             page.update()
                         else:
@@ -194,16 +215,16 @@ def main(page: ft.Page):
             icone_sair = ft.IconButton(icon=ft.icons.LOGOUT, icon_color="white", icon_size=28, tooltip="Sign out", on_click=sair)
         
             topo_app_content = ft.Row([
-                ft.Text("OmniMarket POS", size=24, weight=ft.FontWeight.BOLD, color="white"),
+                ft.Text(NOME_LOJA, size=22, weight=ft.FontWeight.BOLD, color="white", expand=True, max_lines=1, overflow=ft.TextOverflow.ELLIPSIS),
                 ft.Row([icone_dash, icone_sair], spacing=0)
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
             bgcolor_topo = COR_BOTAO_PRINCIPAL
         
-            if os.path.exists("assets/banner.png"):
+            if BANNER_URL or os.path.exists("assets/banner.png"):
                 icone_dash.icon_color = COR_BOTAO_PRINCIPAL
                 icone_sair.icon_color = COR_BOTAO_PRINCIPAL
                 topo_app_content = ft.Row([
-                    ft.Image(src="assets/banner.png", fit=ft.ImageFit.CONTAIN, height=60),
+                    ft.Image(src=BANNER_URL or "assets/banner.png", fit=ft.ImageFit.CONTAIN, height=60),
                     ft.Row([icone_dash, icone_sair], spacing=0)
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                 bgcolor_topo = COR_FUNDO
@@ -340,7 +361,7 @@ def main(page: ft.Page):
                                 ft.Card(content=ft.Container(padding=15, content=ft.Column([
                                     ft.Text(p.get('nome', 'No Name'), weight=ft.FontWeight.BOLD, size=18, color=COR_TEXTO),
                                     ft.Row([ft.Text(f"SKU: {p.get('codigo', '')}", color="gray", size=14), ft.Text(f"Stock: {estoque_atual}", color=COR_VERMELHO_ERRO if estoque_atual <= 2 else COR_VERDE_SUCESSO, weight=ft.FontWeight.BOLD, size=14)], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
-                                    ft.Row([ft.Text(f"$ {float(p.get('preco', 0.0)):.2f}", size=20, color=COR_DESTAQUE, weight=ft.FontWeight.BOLD), ft.IconButton(icon=ft.icons.EDIT, icon_color=COR_BOTAO_PRINCIPAL, tooltip="Edit", on_click=lambda e, prod=p: abrir_edicao_modal(prod))], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+                                    ft.Row([ft.Text(f"{MOEDA} {float(p.get('preco', 0.0)):.2f}", size=20, color=COR_DESTAQUE, weight=ft.FontWeight.BOLD), ft.IconButton(icon=ft.icons.EDIT, icon_color=COR_BOTAO_PRINCIPAL, tooltip="Edit", on_click=lambda e, prod=p: abrir_edicao_modal(prod))], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                                 ])), color=COR_PAINEL, elevation=3)
                             )
                 except Exception:
@@ -369,7 +390,7 @@ def main(page: ft.Page):
             lbl_venda_info = ft.Text("Waiting for scan or search.", size=13, color="gray")
         
             lista_carrinho = ft.ListView(expand=True, spacing=5)
-            lbl_total_carrinho = ft.Text("$ 0.00", size=26, weight=ft.FontWeight.BOLD, color=COR_VERDE_SUCESSO)
+            lbl_total_carrinho = ft.Text(f"{MOEDA} 0.00", size=26, weight=ft.FontWeight.BOLD, color=COR_VERDE_SUCESSO)
             combo_pagamento = ft.Dropdown(options=[ft.dropdown.Option("Cash"), ft.dropdown.Option("Apple/Google Pay"), ft.dropdown.Option("Credit Card"), ft.dropdown.Option("Debit Card"), ft.dropdown.Option("Store Credit")], value="Cash", border_color=COR_DESTAQUE, expand=True, height=50)
 
             def atualizar_ui_carrinho():
@@ -380,9 +401,9 @@ def main(page: ft.Page):
                     for idx, item in enumerate(carrinho_mobile):
                         total_venda += item['subtotal']
                         lista_carrinho.controls.append(
-                            ft.Card(elevation=1, color=COR_PAINEL, content=ft.ListTile(title=ft.Text(f"{item['qtd']}x {item['nome']}", weight=ft.FontWeight.BOLD, size=14), subtitle=ft.Text(f"$ {item['preco']:.2f} ea | Sub: $ {item['subtotal']:.2f}", size=13), trailing=ft.IconButton(icon=ft.icons.DELETE, icon_color=COR_VERMELHO_ERRO, on_click=lambda e, i=idx: remover_do_carrinho(i))))
+                            ft.Card(elevation=1, color=COR_PAINEL, content=ft.ListTile(title=ft.Text(f"{item['qtd']}x {item['nome']}", weight=ft.FontWeight.BOLD, size=14), subtitle=ft.Text(f"{MOEDA} {item['preco']:.2f} ea | Sub: {MOEDA} {item['subtotal']:.2f}", size=13), trailing=ft.IconButton(icon=ft.icons.DELETE, icon_color=COR_VERMELHO_ERRO, on_click=lambda e, i=idx: remover_do_carrinho(i))))
                         )
-                lbl_total_carrinho.value = f"$ {total_venda:.2f}"
+                lbl_total_carrinho.value = f"{MOEDA} {total_venda:.2f}"
                 page.update()
 
             def remover_do_carrinho(index):
@@ -419,7 +440,7 @@ def main(page: ft.Page):
                             produto_atual_venda["custo"] = float(p.get('custo', 0.0))
                             produto_atual_venda["estoque"] = int(p.get('estoque', 0))
                             lbl_venda_nome.value = produto_atual_venda["nome"]
-                            lbl_venda_info.value = f"$ {produto_atual_venda['preco']:.2f} | Stock: {produto_atual_venda['estoque']}"
+                            lbl_venda_info.value = f"{MOEDA} {produto_atual_venda['preco']:.2f} | Stock: {produto_atual_venda['estoque']}"
                             hf.heavy_impact() 
                             mostrar_mensagem("Item ready to add!", COR_BOTAO_PRINCIPAL)
                         else:
@@ -504,7 +525,7 @@ def main(page: ft.Page):
                             venda_cod_input.value = cod
                             page.update()
                             processar_leitura_venda(cod)
-                        lista_busca_resultados.controls.append(ft.ListTile(title=ft.Text(p.get('nome', ''), weight=ft.FontWeight.BOLD), subtitle=ft.Text(f"$ {p.get('preco', 0):.2f} | Stock: {p.get('estoque', 0)}"), on_click=selecionar))
+                        lista_busca_resultados.controls.append(ft.ListTile(title=ft.Text(p.get('nome', ''), weight=ft.FontWeight.BOLD), subtitle=ft.Text(f"{MOEDA} {p.get('preco', 0):.2f} | Stock: {p.get('estoque', 0)}"), on_click=selecionar))
                 page.update()
 
             busca_nome_input = ft.TextField(label="Type name here...", border_color=COR_DESTAQUE, on_change=executar_busca_nome_local)
@@ -531,8 +552,8 @@ def main(page: ft.Page):
             # CHECKOUT
             def perguntar_whatsapp(total, pagamento, itens_copia):
                 msg_itens = ""
-                for i in itens_copia: msg_itens += f"• {i['qtd']}x {i['nome']} ($ {i['preco']:.2f}) = $ {i['subtotal']:.2f}\n"
-                texto_zap = f"*OMNIMARKET POS*\n_Sales Receipt_\n\n*Items:*\n{msg_itens}\n*Total:* $ {total:.2f}\n*Tender:* {pagamento}\n\nThank you for your business!"
+                for i in itens_copia: msg_itens += f"• {i['qtd']}x {i['nome']} ({MOEDA} {i['preco']:.2f}) = {MOEDA} {i['subtotal']:.2f}\n"
+                texto_zap = f"*OMNIMARKET POS*\n_Sales Receipt_\n\n*Items:*\n{msg_itens}\n*Total:* {MOEDA} {total:.2f}\n*Tender:* {pagamento}\n\nThank you for your business!"
                 texto_zap_encoded = urllib.parse.quote(texto_zap)
                 link_zap = f"https://wa.me/?text={texto_zap_encoded}"
 
@@ -615,7 +636,7 @@ def main(page: ft.Page):
                                     alertas_estoque.append(item["nome"])
                                     requests.post(f"{URL}/rest/v1/lista_compras", headers=HEADERS, json={"produto": item["nome"], "observacao": f"Low stock (Remaining {novo_estoque})"}, timeout=5)
 
-                            mostrar_mensagem(f"Checkout Complete! ($ {total_venda:.2f})", COR_VERDE_SUCESSO)
+                            mostrar_mensagem(f"Checkout Complete! ({MOEDA} {total_venda:.2f})", COR_VERDE_SUCESSO)
                             if alertas_estoque: mostrar_mensagem(f"⚠️ {len(alertas_estoque)} items are low on stock.", COR_DESTAQUE)
                         
                             carrinho_mobile.clear()
@@ -711,7 +732,7 @@ def main(page: ft.Page):
                     modal=True, title=ft.Text("⚠️ Duplicate Barcode!", size=18, weight=ft.FontWeight.BOLD, color=COR_VERMELHO_ERRO),
                     content=ft.Container(width=310, content=ft.Column([
                         ft.Text(f"The barcode {dados_novos['codigo']} is already in the system:", size=14),
-                        ft.Container(padding=10, bgcolor="#FFF3CD", border_radius=8, content=ft.Column([ft.Text(f"📦 Current: {nome_antigo}", weight=ft.FontWeight.BOLD, color=COR_TEXTO), ft.Text(f"💰 Price: $ {preco_antigo:.2f} | Stock: {estoque_antigo}", size=13, color="#856404")], spacing=4)),
+                        ft.Container(padding=10, bgcolor="#FFF3CD", border_radius=8, content=ft.Column([ft.Text(f"📦 Current: {nome_antigo}", weight=ft.FontWeight.BOLD, color=COR_TEXTO), ft.Text(f"💰 Price: {MOEDA} {preco_antigo:.2f} | Stock: {estoque_antigo}", size=13, color="#856404")], spacing=4)),
                         ft.Text(f"You are trying to save: '{dados_novos['nome']}'", size=14, weight=ft.FontWeight.BOLD), ft.Divider(), ft.Text("What do you want to do?", size=14, color="gray"),
                         ft.ElevatedButton("🎲 Generate New Barcode", bgcolor=COR_VERDE_SUCESSO, color="white", width=300, on_click=acao_gerar_novo_codigo),
                         ft.ElevatedButton(f"➕ Add Stock", bgcolor=COR_DESTAQUE, color="white", width=300, on_click=acao_somar_estoque),
